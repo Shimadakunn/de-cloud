@@ -3,6 +3,8 @@
 import { Web5 } from "@web5/api";
 import { createContext, useEffect, useState, useRef } from "react";
 
+import crypto from 'crypto';
+
 interface Psw {
   record: any;
   data: {
@@ -20,6 +22,8 @@ export const ProviderContext = createContext<{
     addPsw?: (_url:string, _username:string, _password:string) => void;
     deletePsw?: (pswId: string) => void;
     editPsw?: (pswId: string,_url:string, _username:string, _password:string) => void;
+    encrypt?: (text: string, keyString: string) => string;
+    decrypt?: (encryptedText: string, keyString: string) => string;
   }>({});
 
 export default function Provider({ children }: { children: React.ReactNode }) {
@@ -36,7 +40,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       const { records } = await web5Result.web5.dwn.records.query({
         message: {
           filter: {
-            schema: 'http://some-schema-registry.org/p',
+            schema: 'http://some-schema-registry.org/ps',
           },
         },
       });
@@ -55,13 +59,13 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     const pswData = {
       url: _url,
       username: _username,
-      password: _password,
+      password: encrypt!(_password, myDid!)
     };
 
     const { record } = await web5!.dwn.records.create({
       data: pswData,
       message: {
-        schema: 'http://some-schema-registry.org/p',
+        schema: 'http://some-schema-registry.org/ps',
         dataFormat: 'application/json',
       },
     });
@@ -86,7 +90,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
           ...psw,
           data: {  url: _url,
             username: _username,
-            password: _password, },
+            password: encrypt!(_password, myDid!) }
         };
       }
       return psw;
@@ -104,8 +108,33 @@ export default function Provider({ children }: { children: React.ReactNode }) {
 
     await record.update({ data: {  url: _url,
       username: _username,
-      password: _password, } });
+      password: encrypt!(_password, myDid!), } });
   };
+
+
+  function generateKeyFromString(str: string): Buffer {
+      return crypto.createHash('sha256').update(str).digest();
+  }
+
+  function encrypt(text: string, keyString: string): string {
+      const key = generateKeyFromString(keyString);
+      const iv = crypto.randomBytes(16);
+      const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+      const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+      const encryptedWithIv = Buffer.concat([iv, encrypted]);
+      return encryptedWithIv.toString('base64');
+  }
+
+  function decrypt(encryptedText: string, keyString: string): string {
+      const key = generateKeyFromString(keyString);
+      const encryptedWithIv = Buffer.from(encryptedText, 'base64');
+      const iv = encryptedWithIv.subarray(0, 16);
+      const encrypted = encryptedWithIv.subarray(16);
+      const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+      const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+      return decrypted.toString('utf8');
+  }
+
     return (
         <ProviderContext.Provider
           value={{
@@ -115,6 +144,8 @@ export default function Provider({ children }: { children: React.ReactNode }) {
             addPsw,
             deletePsw,
             editPsw,
+            encrypt,
+            decrypt
           }}
         >
           {children}

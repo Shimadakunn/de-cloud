@@ -16,6 +16,8 @@ import Edit from "../public/icons/edit.json";
 import Copy from "../public/icons/copy.json";
 import Eye from "../public/icons/eye.json";
 
+import { ExternalLink } from 'lucide-react';
+
 import {
   Table,
   TableBody,
@@ -51,7 +53,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 const PswDisplay = () => {
-  const { myDid, psws, addPsw, deletePsw, editPsw } =
+  const { myDid, psws, deletePsw, editPsw,decrypt } =
     useContext(ProviderContext);
 
   const [number, setNumber] = useState(0);
@@ -112,6 +114,10 @@ const PswDisplay = () => {
     setTimeout(() => clearInterval(interval), 1000);
   };
 
+  const hidePassword = (psw:string) => {
+    return psw.replace(/./g, '*');
+  };
+
   const submitEditPsw = (id: string) => {
     let url;
     let username;
@@ -140,6 +146,7 @@ const PswDisplay = () => {
             <TableHead className="w-[100px] text-left">Open</TableHead>
             <TableHead>Website</TableHead>
             <TableHead>Username</TableHead>
+            <TableHead>Password</TableHead>
             <TableHead className="text-right">Delete</TableHead>
           </TableRow>
         </TableHeader>
@@ -152,8 +159,56 @@ const PswDisplay = () => {
                     <Button variant="outline">See</Button>
                   </DrawerTrigger>
                 </TableCell>
-                <TableCell className="w-[20vw]">{psw.data.url}</TableCell>
-                <TableCell>{psw.data.username}</TableCell>
+                <TableCell className="w-[20vw]">
+                <div className="flex justify-start items-center">
+                  {psw.data.url}
+                  <ExternalLink className="ml-2 h-4 w-4 cursor-pointer" onClick={()=>window.open(psw.data.url, '_blank')}/>
+                </div></TableCell>
+                <TableCell className="w-[25vw]">
+                <div className="flex justify-start items-center">
+
+                  {psw.data.username}
+                  <HooverAnimation
+                            animationData={Copy}
+                            className="ml-2 h-6 w-6 cursor-pointer"
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                  psw.data.username
+                                );
+                              toast({
+                                title: "Copied username to clipboard",
+                              });
+                            }}
+                          />
+                </div>
+                  </TableCell>
+                <TableCell>
+                  <div className="flex justify-start items-center">
+                  {!passwordVisible
+                                  ? <span className="mx-2 pt-2">{hidePassword(decrypt!(psw.data.password, myDid!))}</span>
+                                  : decrypt!(psw.data.password, myDid!)}
+                                  <ActivateAnimation
+                                animationData={Eye}
+                                className="ml-2 h-6 w-6 cursor-pointer"
+                                onClick={() => {
+                                  setPasswordVisible(!passwordVisible);
+                                }}
+                              />
+                  <HooverAnimation
+                            animationData={Copy}
+                            className="ml-2 h-6 w-6 cursor-pointer"
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                decrypt!(psw.data.password, myDid!)
+                                );
+                              toast({
+                                title: "Copied password to clipboard",
+                              });
+                            }}
+                          />
+                  </div>
+                  
+                </TableCell>
                 <TableCell className=" flex items-center justify-end">
                   <HooverAnimation
                                 animationData={Trash}
@@ -219,11 +274,9 @@ const PswDisplay = () => {
                             animationData={Copy}
                             className="ml-2 h-6 w-6 cursor-pointer"
                             onClick={() => {
-                              if (!urlModified) {
-                                navigator.clipboard.writeText(psw.data.url);
-                              } else {
-                                navigator.clipboard.writeText(urlModified);
-                              }
+                              !passwordModified ? navigator.clipboard.writeText(
+                                decrypt!(psw.data.password, myDid!)
+                              ) : navigator.clipboard.writeText(passwordModified);
                               toast({
                                 title: "Copied url to clipboard",
                               });
@@ -276,13 +329,9 @@ const PswDisplay = () => {
                             animationData={Copy}
                             className="ml-2 h-6 w-6 cursor-pointer"
                             onClick={() => {
-                              if (!usernameModified) {
-                                navigator.clipboard.writeText(
-                                  psw.data.username
-                                );
-                              } else {
-                                navigator.clipboard.writeText(usernameModified);
-                              }
+                              !passwordModified ? navigator.clipboard.writeText(
+                                decrypt!(psw.data.password, myDid!)
+                              ) : navigator.clipboard.writeText(passwordModified);
                               toast({
                                 title: "Copied identifier to clipboard",
                               });
@@ -297,9 +346,9 @@ const PswDisplay = () => {
                             <>
                               <div className="w-[80%] truncate flex items-center justify-start">
                                 {!passwordVisible
-                                  ? "**********"
+                                  ? hidePassword(decrypt!(psw.data.password, myDid!) )
                                   : !passwordModified && passwordVisible
-                                  ? psw.data.password
+                                  ? decrypt!(psw.data.password, myDid!)
                                   : passwordModified}
                               </div>
                               <ActivateAnimation
@@ -324,7 +373,7 @@ const PswDisplay = () => {
                                 className="w-[80%]"
                                 value={
                                   !passwordModified
-                                    ? psw.data.password
+                                    ? decrypt!(psw.data.password, myDid!)
                                     : passwordModified
                                 }
                                 onChange={(e) => {
@@ -334,7 +383,7 @@ const PswDisplay = () => {
                               <ActivateAnimation
                                 animationData={Eye}
                                 className="ml-2 h-6 w-6 cursor-pointer"
-                                onClick={() => {}}
+                                onClick={() => {setPasswordVisible(!passwordVisible);}}
                               />
                               <LoopAnimation
                                 animationData={Checkmark}
@@ -349,13 +398,9 @@ const PswDisplay = () => {
                             animationData={Copy}
                             className="ml-2 h-6 w-6 cursor-pointer"
                             onClick={() => {
-                              if (!passwordModified) {
-                                navigator.clipboard.writeText(
-                                  psw.data.password
-                                );
-                              } else {
-                                navigator.clipboard.writeText(passwordModified);
-                              }
+                              !passwordModified ? navigator.clipboard.writeText(
+                                decrypt!(psw.data.password, myDid!)
+                              ) : navigator.clipboard.writeText(passwordModified);
                               toast({
                                 title: "Copied password to clipboard",
                               });
