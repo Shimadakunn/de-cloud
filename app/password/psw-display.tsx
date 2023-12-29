@@ -2,19 +2,19 @@
 import { useContext, useEffect, useState } from "react";
 import { ProviderContext } from "@/components/provider";
 
-import ClickAnimation from "../lib/click-animation";
-import HooverAnimation from "../lib/hoover-animation";
-import LoopAnimation from "../lib/loop-animation";
-import ActivateAnimation from "../lib/activate-animation";
+import ClickAnimation from "../../lib/click-animation";
+import HooverAnimation from "../../lib/hoover-animation";
+import LoopAnimation from "../../lib/loop-animation";
+import ActivateAnimation from "../../lib/activate-animation";
 
-import Trash from "../public/icons/trash.json";
-import Error from "../public/icons/error.json";
-import Refresh from "../public/icons/refresh.json";
-import Checkmark from "../public/icons/checkmark-white.json";
-import CheckmarkBlack from "../public/icons/checkmark.json";
-import Edit from "../public/icons/edit.json";
-import Copy from "../public/icons/copy.json";
-import Eye from "../public/icons/eye.json";
+import Trash from "../../public/icons/trash.json";
+import Error from "../../public/icons/error.json";
+import Refresh from "../../public/icons/refresh.json";
+import Checkmark from "../../public/icons/checkmark-white.json";
+import CheckmarkBlack from "../../public/icons/checkmark.json";
+import Edit from "../../public/icons/edit.json";
+import Copy from "../../public/icons/copy.json";
+import Eye from "../../public/icons/eye.json";
 
 import { ExternalLink } from "lucide-react";
 
@@ -117,7 +117,6 @@ const PswDisplay = () => {
   const hidePassword = (psw: string) => {
     return psw.replace(/./g, "*");
   };
-
   const submitEditPsw = (id: string) => {
     let url;
     let username;
@@ -136,6 +135,16 @@ const PswDisplay = () => {
       title: "Password edited",
     });
   };
+
+  const initialVisibility = psws!.reduce((acc, psw) => {
+    acc[psw.id] = false;
+    return acc;
+  }, {} as Record<string, boolean>);
+  const [visibility, setVisibility] = useState(initialVisibility);
+  const toggleVisibility = (id: string) => {
+    setVisibility((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
     <div className="flex-grow">
       <Table>
@@ -191,7 +200,7 @@ const PswDisplay = () => {
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-start items-center">
-                    {!passwordVisible ? (
+                    {!visibility[psw.id] ? (
                       <span className="mx-2 pt-2">
                         {hidePassword(decrypt!(psw.data.password, myDid!))}
                       </span>
@@ -202,7 +211,7 @@ const PswDisplay = () => {
                       animationData={Eye}
                       className="ml-2 h-6 w-6 cursor-pointer"
                       onClick={() => {
-                        setPasswordVisible(!passwordVisible);
+                        toggleVisibility(psw.id);
                       }}
                     />
                     <HooverAnimation

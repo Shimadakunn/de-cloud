@@ -1,13 +1,13 @@
 "use client";
 import { useState, useContext } from "react";
-import HooverAnimation from "../lib/hoover-animation";
-import LoopAnimation from "../lib/loop-animation";
-import ClickAnimation from "../lib/click-animation";
+import HooverAnimation from "../../lib/hoover-animation";
+import LoopAnimation from "../../lib/loop-animation";
+import ClickAnimation from "../../lib/click-animation";
 
-import Checkmark from "../public/icons/checkmark.json";
-import Refresh from "../public/icons/refresh.json";
-import Error from "../public/icons/error.json";
-import Copy from "../public/icons/copy.json";
+import Checkmark from "../../public/icons/checkmark.json";
+import Refresh from "../../public/icons/refresh.json";
+import Error from "../../public/icons/error.json";
+import Copy from "../../public/icons/copy.json";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, } from "react-hook-form";

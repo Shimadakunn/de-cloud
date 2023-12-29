@@ -15,13 +15,34 @@ interface Psw {
   id: string;
 }
 
+interface Note {
+  record: any;
+  data: {
+    name: string;
+    note: string;
+  };
+  id: string;
+}
+
+interface File {
+  record: any;
+  data: {
+    file: string;
+  };
+  id: string;
+}
+
 export const ProviderContext = createContext<{
    web5?: Web5;
     myDid?: string;
     psws?: Psw[];
+    notes?: Note[];
     addPsw?: (_url:string, _username:string, _password:string) => void;
+    addNote?: (_name:string,_note:string) => void;
     deletePsw?: (pswId: string) => void;
+    deleteNote?: (noteId: string) => void;
     editPsw?: (pswId: string,_url:string, _username:string, _password:string) => void;
+    editNote?: (noteId: string, _name:string, _note:string) => void;
     encrypt?: (text: string, keyString: string) => string;
     decrypt?: (encryptedText: string, keyString: string) => string;
   }>({});
@@ -30,6 +51,8 @@ export default function Provider({ children }: { children: React.ReactNode }) {
   const [web5, setWeb5] = useState<Web5>();
   const [myDid, setMyDid] = useState<string>('');
   const [psws, setPsws] = useState<Psw[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
+
 
   const createProtocolDefinition = () => {
     const dingerProtocolDefinition = {
@@ -42,15 +65,30 @@ export default function Provider({ children }: { children: React.ReactNode }) {
             "application/json"
           ]
         },
-        privateNote: {
-          schema: "private-note",
+        note: {
+          schema: "note",
+          dataFormats: [
+            "application/json"
+          ]
+        },
+        file: {
+          schema: "file",
+          dataFormats: [
+            "application/json"
+          ]
+        },
+        wallet: {
+          schema: "wallet",
           dataFormats: [
             "application/json"
           ]
         }
       },
       structure: {
-        "password": {}
+        "password": {},
+        "note": {},
+        "file": {},
+        "wallet": {}
       }
     }
     return dingerProtocolDefinition;
@@ -108,14 +146,25 @@ export default function Provider({ children }: { children: React.ReactNode }) {
             },
           },
         });
-  
         const newPsws = records!.map(async (record) => {
           const data = await record.data.json();
           return { record, data, id: record.id };
         });
         setPsws(await Promise.all(newPsws));
-      }
 
+        const { records: noteRecords } = await web5Result.web5.dwn.records.query({
+          message: {
+            filter: {
+              schema: 'note',
+            },
+          },
+        });
+        const newNotes = noteRecords!.map(async (record) => {
+          const data = await record.data.json();
+          return { record, data, id: record.id };
+        });
+        setNotes(await Promise.all(newNotes));
+      }
     };
 
     connectWeb5();
@@ -140,11 +189,38 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     setPsws([...psws, { record, data, id: record!.id }]);
   };
 
+  const addNote = async (_name:string,_note:string) => {
+    const noteData = {
+      name: _name,
+      note: encrypt!(_note, myDid!)
+    };
+
+    const { record } = await web5!.dwn.records.create({
+      data: noteData,
+      message: {
+        schema: 'note',
+        dataFormat: "application/json",
+      },
+    });
+
+    const data = await record!.data.json();
+    setNotes([...notes, { record, data, id: record!.id }]);
+  };
+
   const deletePsw = async (pswId: string) => {
     setPsws(psws.filter((psw) => psw.id !== pswId));
     await web5!.dwn.records.delete({
       message: {
         recordId: pswId,
+      },
+    });
+  };
+
+  const deleteNote = async (noteId: string) => {
+    setNotes(notes.filter((note) => note.id !== noteId));
+    await web5!.dwn.records.delete({
+      message: {
+        recordId: noteId,
       },
     });
   };
@@ -177,6 +253,31 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       password: encrypt!(_password, myDid!), } });
   };
 
+  const editNote = async (noteId: string,_name:string, _note:string) => {
+    const updatedNotes = notes.map((note) => {
+      if (note.id === noteId) {
+        return {
+          ...note,
+          data: {  name:_name,note: encrypt!(_note, myDid!) }
+        };
+      }
+      return note;
+    });
+
+    setNotes(updatedNotes);
+
+    const { record } = await web5!.dwn.records.read({
+      message: {
+        filter: {
+          recordId: noteId,
+        },
+      },
+    });
+
+    await record.update({ data:{   name:_name,note: encrypt!(_note, myDid!) } });
+  };
+
+
 
   function generateKeyFromString(str: string): Buffer {
       return crypto.createHash('sha256').update(str).digest();
@@ -207,9 +308,13 @@ export default function Provider({ children }: { children: React.ReactNode }) {
             web5,
             myDid,
             psws,
+            notes,
             addPsw,
+            addNote,
             deletePsw,
+            deleteNote,
             editPsw,
+            editNote,
             encrypt,
             decrypt
           }}

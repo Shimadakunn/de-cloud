@@ -1,18 +1,23 @@
 "use client";
-import { PswRegister } from '@/components/psw-register';
-import  PswDisplay  from '@/components/psw-display';
-
-import { use, useContext, useEffect, useState } from "react";
-import { ProviderContext } from "@/components/provider";
+import { useRouter, usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 const MyPage = () => {
+  const router = useRouter();
   return (
-    <main className="flex flex-col w-full h-[93vh] p-6">
-    <div className="">
-      <PswRegister />
-    </div>
-    <PswDisplay/>
-  </main>
+    <main className="flex items-center justify-center w-screen h-screen flex-col space-y-4">
+      <div>
+        De-Cloud
+      </div>
+      <div>
+        Your decentralized cloud storage
+      </div>
+      <Button onClick={() => {
+              router.push("/password");
+            }}>
+        Get Started
+      </Button>
+    </main>
   
   );
 };
