@@ -31,25 +31,91 @@ export default function Provider({ children }: { children: React.ReactNode }) {
   const [myDid, setMyDid] = useState<string>('');
   const [psws, setPsws] = useState<Psw[]>([]);
 
+  const createProtocolDefinition = () => {
+    const dingerProtocolDefinition = {
+      protocol: "http://private-protocol.xyz",
+      published: false,
+      types: {
+        password: {
+          schema: "password",
+          dataFormats: [
+            "application/json"
+          ]
+        },
+        privateNote: {
+          schema: "private-note",
+          dataFormats: [
+            "application/json"
+          ]
+        }
+      },
+      structure: {
+        "password": {}
+      }
+    }
+    return dingerProtocolDefinition;
+  };
+
+  const queryForProtocol = async (web5:any) => {
+    return await web5.dwn.protocols.query({
+      message: {
+        filter: {
+          protocol: "http://private-protocol.xyz",
+        },
+      },
+    });
+  };
+
+  const installProtocolLocally = async (web5:any, protocolDefinition:any) => {
+    return await web5.dwn.protocols.configure({
+      message: {
+        definition: protocolDefinition,
+      },
+    });
+  };
+
+  const configureProtocol = async (web5:any, did:any) => {
+    const protocolDefinition = await createProtocolDefinition();
+
+    const { protocols: localProtocol, status: localProtocolStatus } =
+      await queryForProtocol(web5);
+    console.log({ localProtocol, localProtocolStatus });
+    if (localProtocolStatus.code !== 200 || localProtocol.length === 0) {
+
+      const { protocol, status } = await installProtocolLocally(web5, protocolDefinition);
+      console.log("Protocol installed locally", protocol, status);
+
+      const { status: configureRemoteStatus } = await protocol.send(did);
+      console.log("Did the protocol install on the remote DWN?", configureRemoteStatus);
+    } else {
+      console.log("Protocol already installed");
+    }
+  };
+
   useEffect(() => {
     const connectWeb5 = async () => {
       const web5Result = await Web5.connect();
       setWeb5(web5Result.web5);
       setMyDid(web5Result.did);
 
-      const { records } = await web5Result.web5.dwn.records.query({
-        message: {
-          filter: {
-            schema: 'http://some-schema-registry.org/ps',
+      if (web5Result.web5 && web5Result.did) {
+        await configureProtocol(web5Result.web5, web5Result.did);
+        
+        const { records } = await web5Result.web5.dwn.records.query({
+          message: {
+            filter: {
+              schema: 'password',
+            },
           },
-        },
-      });
+        });
+  
+        const newPsws = records!.map(async (record) => {
+          const data = await record.data.json();
+          return { record, data, id: record.id };
+        });
+        setPsws(await Promise.all(newPsws));
+      }
 
-      const newPsws = records!.map(async (record) => {
-        const data = await record.data.json();
-        return { record, data, id: record.id };
-      });
-      setPsws(await Promise.all(newPsws));
     };
 
     connectWeb5();
@@ -65,7 +131,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     const { record } = await web5!.dwn.records.create({
       data: pswData,
       message: {
-        schema: 'http://some-schema-registry.org/ps',
+        schema: 'password',
         dataFormat: 'application/json',
       },
     });

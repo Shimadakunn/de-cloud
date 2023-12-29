@@ -6,10 +6,11 @@ interface LottieAnimationProps {
   animationData: any;
   className?: string;
   onClick?: () => void;
+  activate?: boolean;
 }
 
-const LottieAnimation: React.FC<LottieAnimationProps> = ({ animationData, className, onClick }) => {
-  const [isEyeVisible, setIsEyeVisible] = useState(false);
+const LottieAnimation: React.FC<LottieAnimationProps> = ({ animationData, className, onClick,activate }) => {
+  const [isEyeVisible, setIsEyeVisible] = useState(activate);
   const animationContainer = useRef<HTMLDivElement>(null);
   const animationInstance = useRef<any>(null);
 
