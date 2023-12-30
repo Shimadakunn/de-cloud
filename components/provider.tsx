@@ -27,7 +27,10 @@ interface Note {
 interface File {
   record: any;
   data: {
-    file: string;
+    name: string;
+    pin: number;
+    date: string;
+    hash: string;
   };
   id: string;
 }
@@ -36,13 +39,19 @@ export const ProviderContext = createContext<{
    web5?: Web5;
     myDid?: string;
     psws?: Psw[];
+    api?: string;
     notes?: Note[];
+    files?: File[];
     addPsw?: (_url:string, _username:string, _password:string) => void;
     addNote?: (_name:string,_note:string) => void;
+    addApi?: (_api:string) => void;
+    addFile?: (_name:string,_pin:number,date:string,hash:string) => void;
     deletePsw?: (pswId: string) => void;
     deleteNote?: (noteId: string) => void;
+    deleteFile?: (fileId: string) => void;
     editPsw?: (pswId: string,_url:string, _username:string, _password:string) => void;
     editNote?: (noteId: string, _name:string, _note:string) => void;
+    editFile?: (fileId: string, _name:string) => void;
     encrypt?: (text: string, keyString: string) => string;
     decrypt?: (encryptedText: string, keyString: string) => string;
   }>({});
@@ -52,6 +61,8 @@ export default function Provider({ children }: { children: React.ReactNode }) {
   const [myDid, setMyDid] = useState<string>('');
   const [psws, setPsws] = useState<Psw[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [api, setApi] = useState<string>();
+  const [files, setFiles] = useState<File[]>([]);
 
 
   const createProtocolDefinition = () => {
@@ -71,6 +82,12 @@ export default function Provider({ children }: { children: React.ReactNode }) {
             "application/json"
           ]
         },
+        api:{
+          schema: "api",
+          dataFormats: [
+            "text/plain"
+          ]
+        },
         file: {
           schema: "file",
           dataFormats: [
@@ -87,6 +104,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       structure: {
         "password": {},
         "note": {},
+        "api": {},
         "file": {},
         "wallet": {}
       }
@@ -152,6 +170,20 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         });
         setPsws(await Promise.all(newPsws));
 
+        const { records: apiRecords } = await web5Result.web5.dwn.records.query({
+          message: {
+            filter: {
+              schema: 'api',
+            },
+          },
+        });
+
+        if (apiRecords && apiRecords.length > 0) {
+          const firstRecord = apiRecords[0];
+          console.log("api value: "+await firstRecord.data.text());
+          setApi( await firstRecord.data.text());
+        }
+
         const { records: noteRecords } = await web5Result.web5.dwn.records.query({
           message: {
             filter: {
@@ -164,6 +196,19 @@ export default function Provider({ children }: { children: React.ReactNode }) {
           return { record, data, id: record.id };
         });
         setNotes(await Promise.all(newNotes));
+
+        const { records: fileRecords } = await web5Result.web5.dwn.records.query({
+          message: {
+            filter: {
+              schema: 'file',
+            },
+          },
+        });
+        const newFiles = fileRecords!.map(async (record) => {
+          const data = await record.data.json();
+          return { record, data, id: record.id };
+        });
+        setFiles(await Promise.all(newFiles));
       }
     };
 
@@ -207,6 +252,53 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     setNotes([...notes, { record, data, id: record!.id }]);
   };
 
+  const addApi = async (_api:string) => {
+    if(api === undefined){  
+      console.log("Api is undefined");
+      const enc_api = encrypt!(_api, myDid!);
+      const { record } = await web5!.dwn.records.create({
+        data: enc_api,
+        message: {
+          schema: 'api',
+          dataFormat: "text/plain",
+        },
+      });
+      const data = await record!.data.text();
+      setApi(data);
+    }else{
+      console.log("Api is defined");
+      const { record } = await web5!.dwn.records.read({
+        message: {
+          filter: {
+            schema: 'api',
+          },
+        },
+      });
+      await record.update({ data: encrypt!(_api, myDid!) });
+      setApi(_api);
+    }
+  };
+
+  const addFile = async (_name:string,_pin:number,date:string,hash:string) => {
+    const fileData = {
+      name: _name,
+      pin: _pin,
+      date: date,
+      hash: encrypt!(hash, myDid!)
+    };
+
+    const { record } = await web5!.dwn.records.create({
+      data: fileData,
+      message: {
+        schema: 'file',
+        dataFormat: "application/json",
+      },
+    });
+
+    const data = await record!.data.json();
+    setFiles([...files, { record, data, id: record!.id }]);
+  }
+
   const deletePsw = async (pswId: string) => {
     setPsws(psws.filter((psw) => psw.id !== pswId));
     await web5!.dwn.records.delete({
@@ -221,6 +313,15 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     await web5!.dwn.records.delete({
       message: {
         recordId: noteId,
+      },
+    });
+  };
+
+  const deleteFile = async (fileId: string) => {
+    setFiles(files.filter((file) => file.id !== fileId));
+    await web5!.dwn.records.delete({
+      message: {
+        recordId: fileId,
       },
     });
   };
@@ -277,6 +378,31 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     await record.update({ data:{   name:_name,note: encrypt!(_note, myDid!) } });
   };
 
+  const editFile = async (fileId: string,_name:string) => {
+    let data;
+    const updatedFiles = files.map((file) => {
+      if (file.id === fileId) {
+        data = file.data;
+        return {
+          ...file,
+          data: {  name:_name,pin:file.data.pin,date: file.data.date,hash: file.data.hash }
+        };
+      }
+      return file;
+    });
+
+    setFiles(updatedFiles);
+
+    const { record } = await web5!.dwn.records.read({
+      message: {
+        filter: {
+          recordId: fileId,
+        },
+      },
+    });
+
+    await record.update({ data:data });
+  };
 
 
   function generateKeyFromString(str: string): Buffer {
@@ -309,12 +435,18 @@ export default function Provider({ children }: { children: React.ReactNode }) {
             myDid,
             psws,
             notes,
+            api,
+            files,
             addPsw,
             addNote,
+            addApi,
+            addFile,
             deletePsw,
             deleteNote,
+            deleteFile,
             editPsw,
             editNote,
+            editFile,
             encrypt,
             decrypt
           }}

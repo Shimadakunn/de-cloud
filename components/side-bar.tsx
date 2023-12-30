@@ -36,7 +36,7 @@ const Header = () => {
           >
             <Lock className="ml-5 h-6 w-6" />
             <div
-              className={`absolute ml-14 transition-all duration-300 ease-in-out ${
+              className={`absolute ml-24 transition-all duration-300 ease-in-out ${
                 open ? "opacity-100" : "opacity-0"
               }`}
             >
@@ -51,7 +51,7 @@ const Header = () => {
           >
             <StickyNote className="ml-5 h-6 w-6" />
             <div
-              className={`absolute ml-14 transition-all duration-300 ease-in-out ${
+              className={`absolute ml-24 transition-all duration-300 ease-in-out ${
                 open ? "opacity-100" : "opacity-0"
               }`}
             >
@@ -66,7 +66,7 @@ const Header = () => {
           >
             <Paperclip className="ml-5 h-6 w-6" />
             <div
-              className={`absolute ml-14 transition-all duration-300 ease-in-out ${
+              className={`absolute ml-24 transition-all duration-300 ease-in-out ${
                 open ? "opacity-100" : "opacity-0"
               }`}
             >
@@ -81,7 +81,7 @@ const Header = () => {
           >
             <Wallet className="ml-5 h-6 w-6" />
             <div
-              className={`absolute ml-14 transition-all duration-300 ease-in-out ${
+              className={`absolute ml-24 transition-all duration-300 ease-in-out ${
                 open ? "opacity-100" : "opacity-0"
               }`}
             >
