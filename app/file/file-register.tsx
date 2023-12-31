@@ -11,6 +11,15 @@ import Refresh from "../../public/icons/refresh.json";
 import Error from "../../public/icons/error.json";
 import Copy from "../../public/icons/copy.json";
 
+import { Info } from "lucide-react";
+
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { set, useForm } from "react-hook-form";
 import * as z from "zod";
@@ -50,14 +59,22 @@ const FormSchema = z.object({
 });
 
 export function PswRegister() {
-  const { myDid, api, addApi, decrypt, addFile } = useContext(ProviderContext);
+  const { myDid, api, gateway, addApi, addGateway, decrypt, addFile } =
+    useContext(ProviderContext);
 
   const [apiEdit, setApiEdit] = useState(false);
   const [apiModified, setApiModified] = useState<string>();
 
+  const [gatewayEdit, setGatewayEdit] = useState(false);
+  const [gatewayModified, setGatewayModified] = useState<string>();
+
   useEffect(() => {
     setApiEdit(api === undefined);
   }, [api]);
+
+  useEffect(() => {
+    setGatewayEdit(gateway === undefined);
+  }, [gateway]);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -97,7 +114,12 @@ export function PswRegister() {
           },
         }
       );
-      addFile!(data.name,response.data.PinSize,response.data.Timestamp,response.data.IpfsHash);
+      addFile!(
+        data.name,
+        response.data.PinSize,
+        response.data.Timestamp,
+        response.data.IpfsHash
+      );
       toast({
         title: "Your file was successfully uploaded!",
         description: (
@@ -106,7 +128,8 @@ export function PswRegister() {
               <span className="font-extrabold">Name:</span> {data.name}
             </div>
             <div>
-              <span className="font-extrabold">Time:</span> {response.data.Timestamp}
+              <span className="font-extrabold">Time:</span>{" "}
+              {response.data.Timestamp}
             </div>
           </pre>
         ),
@@ -126,7 +149,7 @@ export function PswRegister() {
         <AlertDialogTrigger asChild>
           <Button>
             <PlusIcon className="mr-2 h-4 w-4" />
-            Add Note
+            Add File
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent className="sm:max-w-[425px]">
@@ -197,10 +220,81 @@ export function PswRegister() {
       </AlertDialog>
       <div className="flex items-center justify-center h-10">
         {myDid &&
+          (!gatewayEdit ? (
+            <>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="mr-2 h-4 w-4 cursor-pointer text-gray-300" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Gateway can be set up on your Pinata Cloud account</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              <div className="w-[14rem] truncate">
+                <span className="text-gray-500 mr-1 truncate">Gateway: </span>
+                {gatewayModified ?? decrypt!(gateway!, myDid)}
+              </div>
+              <HooverAnimation
+                animationData={Edit}
+                className="ml-2 mr-8 h-6 w-6 cursor-pointer"
+                onClick={() => setGatewayEdit(true)}
+              />
+            </>
+          ) : (
+            <>
+              <Input
+                type="text"
+                className="w-[12rem]"
+                placeholder="Gateway"
+                onChange={(e) => setGatewayModified(e.target.value)}
+              />
+              <LoopAnimation
+                animationData={Checkmark}
+                className="ml-2 h-6 w-6 cursor-pointer"
+                onClick={() => {
+                  if (!gatewayModified) {
+                    toast({
+                      variant: "destructive",
+                      title: "Gateway must be filled",
+                    });
+                  } else {
+                    addGateway!(gatewayModified);
+                    toast({
+                      title: "Gateway updated",
+                    });
+                    setGatewayEdit(false);
+                  }
+                }}
+              />
+              <LoopAnimation
+                animationData={Error}
+                className="mr-8 h-6 w-6 cursor-pointer"
+                onClick={() => setGatewayEdit(false)}
+              />
+            </>
+          ))}
+        {myDid &&
           (!apiEdit ? (
             <>
-              <div className="w-48 truncate">
-                <span className="text-gray-500 mr-1">Pinata API: </span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="mr-2 h-4 w-4 cursor-pointer text-gray-300" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        JWT Key can be foudn when creating a new api key on
+                        Pinata CLoud
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              <div className="w-[14rem] truncate">
+                <span className="text-gray-500 mr-1">
+                  Pinata JWT:{" "}
+                </span>
                 {apiModified ?? decrypt!(api!, myDid)}
               </div>
               <HooverAnimation
@@ -213,8 +307,8 @@ export function PswRegister() {
             <>
               <Input
                 type="text"
-                className="w-[80%]"
-                placeholder="Api key"
+                className="w-[12rem]"
+                placeholder="JWT"
                 onChange={(e) => setApiModified(e.target.value)}
               />
               <LoopAnimation
@@ -224,12 +318,12 @@ export function PswRegister() {
                   if (!apiModified) {
                     toast({
                       variant: "destructive",
-                      title: "Api key must be filled",
+                      title: "JWT must be filled",
                     });
                   } else {
                     addApi!(apiModified);
                     toast({
-                      title: "Api key updated",
+                      title: "JWT updated",
                     });
                     setApiEdit(false);
                   }

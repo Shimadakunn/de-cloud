@@ -54,7 +54,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 const PswDisplay = () => {
-  const { myDid, notes, deleteNote, editNote, decrypt } =
+  const { myDid, gateway, files, deleteFile, editFile, decrypt } =
     useContext(ProviderContext);
 
   const [number, setNumber] = useState(0);
@@ -86,23 +86,27 @@ const PswDisplay = () => {
   const [noteEdit, setNoteEdit] = useState(false);
   const [noteModified, setNoteModified] = useState<string>();
 
-  const submitNotePsw = (id: string) => {
-    let name;
-    let note;
-    console.log("name" + nameModified);
-    console.log("note" + noteModified);
-    !nameModified
-      ? (name = notes!.find((note) => note.id === id)!.data.name)
-      : (name = nameModified);
-    !noteModified
-      ? (note = decrypt!(notes!.find((psw) => psw.id === id)!.data.note, myDid!))
-      : (note = noteModified);
-    console.log("name" + name);
-    console.log("note" + note);
-      editNote!(id, name, note);
-    toast({
-      title: "Note edited",
-    });
+  // const submitNotePsw = (id: string) => {
+  //   let name;
+  //   let note;
+  //   console.log("name" + nameModified);
+  //   console.log("note" + noteModified);
+  //   !nameModified
+  //     ? (name = notes!.find((note) => note.id === id)!.data.name)
+  //     : (name = nameModified);
+  //   !noteModified
+  //     ? (note = decrypt!(notes!.find((psw) => psw.id === id)!.data.note, myDid!))
+  //     : (note = noteModified);
+  //   console.log("name" + name);
+  //   console.log("note" + note);
+  //     editNote!(id, name, note);
+  //   toast({
+  //     title: "Note edited",
+  //   });
+  // };
+
+  const openLink = (_hash: string) => {
+    window.open(_hash, "_blank");
   };
 
   return (
@@ -114,50 +118,57 @@ const PswDisplay = () => {
               <Progress value={number} className="w-[60%]" />
             </div>
           )}
-          All your notes
+          All your files
         </TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px] text-left">Open</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Note</TableHead>
+            <TableHead className="w-[10vw]">Name</TableHead>
+            <TableHead>Pin</TableHead>
+            <TableHead>Date</TableHead>
             <TableHead className="text-right">Delete</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {notes!.map((note) => (
+          {files!.map((file) => (
             <Drawer>
-              <TableRow key={note.id}>
+              <TableRow key={file.id}>
                 <TableCell className="w-[100px] pl-2">
-                  <DrawerTrigger asChild>
-                    <Button variant="outline">See</Button>
-                  </DrawerTrigger>
+                  <Button variant="outline"
+                    onClick={() => {
+                      window.open("https://"+decrypt!(gateway!,myDid!)+"/ipfs/"+decrypt!(file.data.hash!,myDid!), "_blank");
+                      toast({
+                        title: "If there is a problem with the link, try to refresh the page.",
+                      });
+                    }}
+                  >See</Button>
                 </TableCell>
-                <TableCell>
+                <TableCell className="">
                   <div className="flex justify-start items-center">
-                    {note.data.name}
+                    {file.data.name}
                   </div>
                 </TableCell>
-                <TableCell>
-                  <div className="flex justify-start items-center truncate">
-                    {decrypt!(note.data.note, myDid!)}
-                  </div>
+                <TableCell className="">
+                    {file.data.pin}
+                </TableCell>
+                <TableCell className="">
+                    {file.data.date}
                 </TableCell>
                 <TableCell className=" flex items-center justify-end">
                   <HooverAnimation
                     animationData={Trash}
                     className="h-6 w-6 cursor-pointer"
                     onClick={() => {
-                      deleteNote!(note.id);
+                      deleteFile!(file.id);
                       toast({
                         variant: "destructive",
-                        title: "Note deleted",
+                        title: "File deleted",
                       });
                     }}
                   />
                 </TableCell>
               </TableRow>
-              <DrawerContent>
+              {/* <DrawerContent>
                 <div className="mx-auto w-full max-w-sm">
                   <DrawerHeader>
                     <DrawerTitle>Note Information</DrawerTitle>
@@ -279,7 +290,7 @@ const PswDisplay = () => {
                     </DrawerClose>
                   </DrawerFooter>
                 </div>
-              </DrawerContent>
+              </DrawerContent> */}
             </Drawer>
           ))}
         </TableBody>

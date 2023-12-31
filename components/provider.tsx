@@ -40,11 +40,13 @@ export const ProviderContext = createContext<{
     myDid?: string;
     psws?: Psw[];
     api?: string;
+    gateway?: string;
     notes?: Note[];
     files?: File[];
     addPsw?: (_url:string, _username:string, _password:string) => void;
     addNote?: (_name:string,_note:string) => void;
     addApi?: (_api:string) => void;
+    addGateway?: (_gateway:string) => void;
     addFile?: (_name:string,_pin:number,date:string,hash:string) => void;
     deletePsw?: (pswId: string) => void;
     deleteNote?: (noteId: string) => void;
@@ -62,6 +64,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
   const [psws, setPsws] = useState<Psw[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [api, setApi] = useState<string>();
+  const [gateway, setGateway] = useState<string>();
   const [files, setFiles] = useState<File[]>([]);
 
 
@@ -84,6 +87,12 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         },
         api:{
           schema: "api",
+          dataFormats: [
+            "text/plain"
+          ]
+        },
+        gateway:{
+          schema: "gateway",
           dataFormats: [
             "text/plain"
           ]
@@ -184,6 +193,20 @@ export default function Provider({ children }: { children: React.ReactNode }) {
           setApi( await firstRecord.data.text());
         }
 
+        const { records: gatewayRecords } = await web5Result.web5.dwn.records.query({
+          message: {
+            filter: {
+              schema: 'gateway',
+            },
+          },
+        });
+
+        if (gatewayRecords && gatewayRecords.length > 0) {
+          const firstGateway = gatewayRecords[0];
+          console.log("gateway value: "+await firstGateway.data.text());
+          setGateway( await firstGateway.data.text());
+        }
+
         const { records: noteRecords } = await web5Result.web5.dwn.records.query({
           message: {
             filter: {
@@ -279,6 +302,33 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const addGateway = async (_gateway:string) => {
+    if(gateway === undefined){  
+      console.log("Gateway is undefined");
+      const enc_gateway = encrypt!(_gateway, myDid!);
+      const { record } = await web5!.dwn.records.create({
+        data: enc_gateway,
+        message: {
+          schema: 'gateway',
+          dataFormat: "text/plain",
+        },
+      });
+      const data = await record!.data.text();
+      setGateway(data);
+    }else{
+      console.log("Provider is defined");
+      const { record } = await web5!.dwn.records.read({
+        message: {
+          filter: {
+            schema: 'gateway',
+          },
+        },
+      });
+      await record.update({ data: encrypt!(_gateway, myDid!) });
+      setGateway(_gateway);
+    }
+  }
+
   const addFile = async (_name:string,_pin:number,date:string,hash:string) => {
     const fileData = {
       name: _name,
@@ -319,10 +369,31 @@ export default function Provider({ children }: { children: React.ReactNode }) {
 
   const deleteFile = async (fileId: string) => {
     setFiles(files.filter((file) => file.id !== fileId));
+    const cid = files.filter((file) => file.id === fileId)[0].data.pin;
     await web5!.dwn.records.delete({
       message: {
         recordId: fileId,
       },
+    });
+
+    const url = 'https://api.pinata.cloud/pinning/unpin/';
+    const options = {
+      method: 'DELETE',
+      headers: { 'accept': 'application/json' }
+    };
+
+    fetch(url+cid, options)
+    .then((res: Response)=> {
+      if (!res.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return res.json();
+    })
+    .then((data:any) => {
+      console.log(data);
+    })
+    .catch((err:Error) => {
+      console.error('Error:', err);
     });
   };
 
@@ -436,10 +507,12 @@ export default function Provider({ children }: { children: React.ReactNode }) {
             psws,
             notes,
             api,
+            gateway,
             files,
             addPsw,
             addNote,
             addApi,
+            addGateway,
             addFile,
             deletePsw,
             deleteNote,
