@@ -4,7 +4,7 @@ import { useState,useEffect } from "react";
 import Scrumble from "@/components/ui/scrumble-text/scrumble";
 import { Button } from "@/components/ui/button";
 
-import { Web5 } from "@web5/api";
+import { Web5 } from "@web5/api/browser";
 
 const MyPage = () => {
   const router = useRouter();
