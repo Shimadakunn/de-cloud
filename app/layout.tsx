@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import Provider from '../components/provider'
+import Provider from '@/components/provider'
 import SideBar from '@/components/side-bar'
 import { Toaster } from "@/components/ui/toaster"
 
@@ -20,13 +20,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-      {/* <Provider> */}
+      <Provider>
         <div className='flex'>
           <SideBar />
           {children}
         </div>
         <Toaster />
-      {/* </Provider> */}
+      </Provider>
       </body>
     </html>
   )
