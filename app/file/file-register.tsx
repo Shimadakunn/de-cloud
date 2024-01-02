@@ -49,10 +49,21 @@ import { toast } from "@/components/ui/use-toast";
 import { ProviderContext } from "@/components/provider";
 
 export function PswRegister() {
-  const FormSchema = z.object({
+  let FormSchema:any;
+
+if (typeof window !== 'undefined') {
+  // This code will only run in the browser (client-side)
+  FormSchema = z.object({
     name: z.string().min(2, { message: "Name is required" }),
     file: z.instanceof(File).optional(),
   });
+} else {
+  // This code will run on the server (server-side)
+  FormSchema = z.object({
+    name: z.string().min(2, { message: "Name is required" }),
+    // You can exclude the 'file' field or handle it differently here
+  });
+}
 
   const { myDid, api, gateway, addApi, addGateway, decrypt, addFile } =
     useContext(ProviderContext);
