@@ -8,9 +8,8 @@ const MyPage = () => {
     <div className="flex justify-between items-center">
       <PswRegister />
     </div>
-    <PswDisplay/>
+    {/* <PswDisplay/> */}
   </main>
-  
   );
 };
 
