@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
 const PswDisplay = () => {
-  const { myDid, gateway, files, deleteFile, editFile, decrypt } =
+  const { myDid, gateway, files, deleteFile, decrypt } =
     useContext(ProviderContext);
 
   const [number, setNumber] = useState(0);
