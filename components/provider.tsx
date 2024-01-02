@@ -76,12 +76,12 @@ export const ProviderContext = createContext<{
 export default function Provider({ children }: { children: React.ReactNode }) {
   const [web5, setWeb5] = useState<Web5>();
   const [myDid, setMyDid] = useState<string>('');
-  const [psws, setPsws] = useState<Psw[]>([]);
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [api, setApi] = useState<string>();
-  const [gateway, setGateway] = useState<string>();
-  const [files, setFiles] = useState<File[]>([]);
-  const [wallets, setWallet] = useState<Wallet[]>([]);
+  // const [psws, setPsws] = useState<Psw[]>([]);
+  // const [notes, setNotes] = useState<Note[]>([]);
+  // const [api, setApi] = useState<string>();
+  // const [gateway, setGateway] = useState<string>();
+  // const [files, setFiles] = useState<File[]>([]);
+  // const [wallets, setWallet] = useState<Wallet[]>([]);
 
 
   const createProtocolDefinition = () => {
@@ -183,85 +183,85 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       if (web5Result.web5 && web5Result.did) {
         await configureProtocol(web5Result.web5, web5Result.did);
         
-        const { records } = await web5Result.web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'password',
-            },
-          },
-        });
-        const newPsws = records!.map(async (record) => {
-          const data = await record.data.json();
-          return { record, data, id: record.id };
-        });
-        setPsws(await Promise.all(newPsws));
+        // const { records } = await web5Result.web5.dwn.records.query({
+        //   message: {
+        //     filter: {
+        //       schema: 'password',
+        //     },
+        //   },
+        // });
+        // const newPsws = records!.map(async (record) => {
+        //   const data = await record.data.json();
+        //   return { record, data, id: record.id };
+        // });
+        // setPsws(await Promise.all(newPsws));
 
-        const { records: apiRecords } = await web5Result.web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'api',
-            },
-          },
-        });
+        // const { records: apiRecords } = await web5Result.web5.dwn.records.query({
+        //   message: {
+        //     filter: {
+        //       schema: 'api',
+        //     },
+        //   },
+        // });
 
-        if (apiRecords && apiRecords.length > 0) {
-          const firstRecord = apiRecords[0];
-          console.log("api value: "+await firstRecord.data.text());
-          setApi( await firstRecord.data.text());
-        }
+        // if (apiRecords && apiRecords.length > 0) {
+        //   const firstRecord = apiRecords[0];
+        //   console.log("api value: "+await firstRecord.data.text());
+        //   setApi( await firstRecord.data.text());
+        // }
 
-        const { records: gatewayRecords } = await web5Result.web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'gateway',
-            },
-          },
-        });
+        // const { records: gatewayRecords } = await web5Result.web5.dwn.records.query({
+        //   message: {
+        //     filter: {
+        //       schema: 'gateway',
+        //     },
+        //   },
+        // });
 
-        if (gatewayRecords && gatewayRecords.length > 0) {
-          const firstGateway = gatewayRecords[0];
-          console.log("gateway value: "+await firstGateway.data.text());
-          setGateway( await firstGateway.data.text());
-        }
+        // if (gatewayRecords && gatewayRecords.length > 0) {
+        //   const firstGateway = gatewayRecords[0];
+        //   console.log("gateway value: "+await firstGateway.data.text());
+        //   setGateway( await firstGateway.data.text());
+        // }
 
-        const { records: noteRecords } = await web5Result.web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'note',
-            },
-          },
-        });
-        const newNotes = noteRecords!.map(async (record) => {
-          const data = await record.data.json();
-          return { record, data, id: record.id };
-        });
-        setNotes(await Promise.all(newNotes));
+        // const { records: noteRecords } = await web5Result.web5.dwn.records.query({
+        //   message: {
+        //     filter: {
+        //       schema: 'note',
+        //     },
+        //   },
+        // });
+        // const newNotes = noteRecords!.map(async (record) => {
+        //   const data = await record.data.json();
+        //   return { record, data, id: record.id };
+        // });
+        // setNotes(await Promise.all(newNotes));
 
-        const { records: fileRecords } = await web5Result.web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'file',
-            },
-          },
-        });
-        const newFiles = fileRecords!.map(async (record) => {
-          const data = await record.data.json();
-          return { record, data, id: record.id };
-        });
-        setFiles(await Promise.all(newFiles));
+        // const { records: fileRecords } = await web5Result.web5.dwn.records.query({
+        //   message: {
+        //     filter: {
+        //       schema: 'file',
+        //     },
+        //   },
+        // });
+        // const newFiles = fileRecords!.map(async (record) => {
+        //   const data = await record.data.json();
+        //   return { record, data, id: record.id };
+        // });
+        // setFiles(await Promise.all(newFiles));
 
-        const { records: walletRecords } = await web5Result.web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'wallet',
-            },
-          },
-        });
-        const newWallets = walletRecords!.map(async (record) => {
-          const data = await record.data.json();
-          return { record, data, id: record.id };
-        });
-        setWallet(await Promise.all(newWallets));
+        // const { records: walletRecords } = await web5Result.web5.dwn.records.query({
+        //   message: {
+        //     filter: {
+        //       schema: 'wallet',
+        //     },
+        //   },
+        // });
+        // const newWallets = walletRecords!.map(async (record) => {
+        //   const data = await record.data.json();
+        //   return { record, data, id: record.id };
+        // });
+        // setWallet(await Promise.all(newWallets));
       }
     };
 
