@@ -1,40 +1,10 @@
 "use client";
-import { useRouter, usePathname } from "next/navigation";
-import { useState,useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Scrumble from "@/components/ui/scrumble-text/scrumble";
 import { Button } from "@/components/ui/button";
 
-import { Web5 } from "@web5/api";
-
 const MyPage = () => {
   const router = useRouter();
-
-  const [web5, setWeb5] = useState<Web5>();
-  const [myDid, setMyDid] = useState<string>('');
-
-  useEffect(() => {
-
-    const initWeb5 = async () => {
-      // @ts-ignore
-      const { Web5 } = await import('@web5/api');
-      
-      try {
-        const { web5, did } = await Web5.connect({sync: '5s'});
-        setWeb5(web5);
-        setMyDid(did);
-        console.log(web5);
-        if (web5 && did) {
-          console.log('Web5 initialized');
-          // await configureProtocol(web5, did);
-        }
-      } catch (error) {
-        console.error('Error initializing Web5:', error);
-      }
-    };
-
-    initWeb5();
- 
-}, []);
   
   return (
     <main className="bg-[url('../public/background.png')] bg-cover flex items-center justify-center w-screen h-screen space-y-4">
@@ -54,7 +24,6 @@ const MyPage = () => {
       </Button>
       </div>
       <div className="w-full">
-      {myDid}
       </div>
     </main>
   
