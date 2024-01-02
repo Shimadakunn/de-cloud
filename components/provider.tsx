@@ -68,7 +68,6 @@ export const ProviderContext = createContext<{
     deleteWallet?: (walletId: string) => void;
     editPsw?: (pswId: string,_url:string, _username:string, _password:string) => void;
     editNote?: (noteId: string, _name:string, _note:string) => void;
-    editFile?: (fileId: string, _name:string) => void;
     encrypt?: (text: string, keyString: string) => string;
     decrypt?: (encryptedText: string, keyString: string) => string;
   }>({});
@@ -515,32 +514,6 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     await record.update({ data:{   name:_name,note: encrypt!(_note, myDid!) } });
   };
 
-  const editFile = async (fileId: string,_name:string) => {
-    let data;
-    const updatedFiles = files.map((file) => {
-      if (file.id === fileId) {
-        data = file.data;
-        return {
-          ...file,
-          data: {  name:_name,pin:file.data.pin,date: file.data.date,hash: file.data.hash }
-        };
-      }
-      return file;
-    });
-
-    setFiles(updatedFiles);
-
-    const { record } = await web5!.dwn.records.read({
-      message: {
-        filter: {
-          recordId: fileId,
-        },
-      },
-    });
-
-    await record.update({ data:data });
-  };
-
   function generateKeyFromString(str: string): Buffer {
       return crypto.createHash('sha256').update(str).digest();
   }
@@ -587,7 +560,6 @@ export default function Provider({ children }: { children: React.ReactNode }) {
             deleteWallet,
             editPsw,
             editNote,
-            editFile,
             encrypt,
             decrypt
           }}

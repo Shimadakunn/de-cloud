@@ -6,9 +6,9 @@ const MyPage = () => {
   return (
     <main className="flex flex-col w-full h-[93vh] p-6">
     <div className="flex justify-between items-center">
-      <PswRegister />
+      {/* <PswRegister /> */}
     </div>
-    {/* <PswDisplay/> */}
+    <PswDisplay/>
   </main>
   );
 };
