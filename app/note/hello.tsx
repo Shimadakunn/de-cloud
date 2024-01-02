@@ -1,11 +1,11 @@
 "use client";
-import { PswRegister } from '@/public/file/file-register';
-import  PswDisplay  from '@/public/file/file-display';
+import { PswRegister } from '@/app/note/note-register';
+import  PswDisplay  from '@/app/note/note-display';
 
 const MyPage = () => {
   return (
     <main className="flex flex-col w-full h-[93vh] p-6">
-    <div className="flex justify-between items-center">
+    <div className="">
       <PswRegister />
     </div>
     <PswDisplay/>

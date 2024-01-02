@@ -4,9 +4,9 @@ import { useState, useContext, useEffect} from "react";
 import HooverAnimation from "../../lib/hoover-animation";
 import LoopAnimation from "../../lib/loop-animation";
 
-import Edit from "../icons/edit.json";
-import Checkmark from "../icons/checkmark-white.json";
-import Error from "../icons/error.json";
+import Edit from "../../public/icons/edit.json";
+import Checkmark from "../../public/icons/checkmark-white.json";
+import Error from "../../public/icons/error.json";
 
 import { Info } from "lucide-react";
 

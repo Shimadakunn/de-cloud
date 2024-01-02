@@ -4,7 +4,7 @@ import { ProviderContext } from "@/components/provider";
 
 import HooverAnimation from "../../lib/hoover-animation";
 
-import Trash from "../icons/trash.json";
+import Trash from "../../public/icons/trash.json";
 
 import {
   Table,

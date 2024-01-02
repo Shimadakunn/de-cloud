@@ -4,10 +4,10 @@ import HooverAnimation from "../../lib/hoover-animation";
 import LoopAnimation from "../../lib/loop-animation";
 import ClickAnimation from "../../lib/click-animation";
 
-import Checkmark from "../icons/checkmark.json";
-import Refresh from "../icons/refresh.json";
-import Error from "../icons/error.json";
-import Copy from "../icons/copy.json";
+import Checkmark from "../../public/icons/checkmark.json";
+import Refresh from "../../public/icons/refresh.json";
+import Error from "../../public/icons/error.json";
+import Copy from "../../public/icons/copy.json";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, } from "react-hook-form";
