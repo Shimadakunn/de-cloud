@@ -60,7 +60,7 @@ const PswDisplay = () => {
   return (
     <div className="flex-grow">
       <Table>
-        <TableCaption>
+        {/* <TableCaption>
           {!myDid && (
             <div className="h-[60vh] flex items-center justify-center">
               <Progress value={number} className="w-[60%]" />
@@ -76,7 +76,7 @@ const PswDisplay = () => {
             <TableHead>Date</TableHead>
             <TableHead className="text-right">Delete</TableHead>
           </TableRow>
-        </TableHeader>
+        </TableHeader> */}
         <TableBody>
           {files!.map((file) => (
               <TableRow key={file.id}>
