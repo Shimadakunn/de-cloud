@@ -22,9 +22,7 @@ class TextScramble {
   }
 
   setText(newText: string): Promise<void> {
-    console.log("el: " + this.el);
     const oldText = this.el?.innerText;
-    console.log("oldText: " + oldText);
     const length = Math.max(oldText?.length, newText.length);
     const promise = new Promise<void>((resolve) => (this.resolve = resolve));
     this.queue = [];
