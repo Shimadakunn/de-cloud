@@ -4,7 +4,7 @@ import { useState,useEffect } from "react";
 import Scrumble from "@/components/ui/scrumble-text/scrumble";
 import { Button } from "@/components/ui/button";
 
-import { Web5 } from "@web5/api/browser";
+import { Web5 } from "@web5/api";
 
 const MyPage = () => {
   const router = useRouter();
@@ -16,7 +16,7 @@ const MyPage = () => {
 
     const initWeb5 = async () => {
       // @ts-ignore
-      const { Web5 } = await import('@web5/api/browser');
+      const { Web5 } = await import('@web5/api');
       
       try {
         const { web5, did } = await Web5.connect({sync: '5s'});
