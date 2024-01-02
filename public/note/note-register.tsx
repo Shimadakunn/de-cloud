@@ -2,8 +2,8 @@
 import { useContext } from "react";
 import LoopAnimation from "../../lib/loop-animation";
 
-import Checkmark from "../../public/icons/checkmark.json";
-import Error from "../../public/icons/error.json";
+import Checkmark from "../icons/checkmark.json";
+import Error from "../icons/error.json";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, } from "react-hook-form";

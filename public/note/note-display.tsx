@@ -5,11 +5,11 @@ import { ProviderContext } from "@/components/provider";
 import HooverAnimation from "../../lib/hoover-animation";
 import LoopAnimation from "../../lib/loop-animation";
 
-import Trash from "../../public/icons/trash.json";
-import Error from "../../public/icons/error.json";
-import Checkmark from "../../public/icons/checkmark-white.json";
-import CheckmarkBlack from "../../public/icons/checkmark.json";
-import Edit from "../../public/icons/edit.json";
+import Trash from "../icons/trash.json";
+import Error from "../icons/error.json";
+import Checkmark from "../icons/checkmark-white.json";
+import CheckmarkBlack from "../icons/checkmark.json";
+import Edit from "../icons/edit.json";
 
 import {
   Table,

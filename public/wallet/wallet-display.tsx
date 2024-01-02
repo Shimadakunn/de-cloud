@@ -6,10 +6,10 @@ import HooverAnimation from "../../lib/hoover-animation";
 import LoopAnimation from "../../lib/loop-animation";
 import ActivateAnimation from "../../lib/activate-animation";
 
-import Trash from "../../public/icons/trash.json";
-import CheckmarkBlack from "../../public/icons/checkmark.json";
-import Copy from "../../public/icons/copy.json";
-import Eye from "../../public/icons/eye.json";
+import Trash from "../icons/trash.json";
+import CheckmarkBlack from "../icons/checkmark.json";
+import Copy from "../icons/copy.json";
+import Eye from "../icons/eye.json";
 
 import {
   Table,

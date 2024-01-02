@@ -1,6 +1,6 @@
 "use client";
-import { PswRegister } from '@/app/wallet/wallet-register';
-import  PswDisplay  from '@/app/wallet/wallet-display';
+import { PswRegister } from '@/public/password/psw-register';
+import  PswDisplay  from '@/public/password/psw-display';
 
 const MyPage = () => {
   return (
@@ -10,6 +10,7 @@ const MyPage = () => {
     </div>
     <PswDisplay/>
   </main>
+  
   );
 };
 
