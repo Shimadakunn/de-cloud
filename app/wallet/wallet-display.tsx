@@ -98,8 +98,8 @@ const PswDisplay = () => {
         </TableHeader>
         <TableBody>
           {wallets!.map((wallet) => (
-            <Drawer>
-              <TableRow key={wallet.id}>
+            <Drawer key={wallet.id}>
+              <TableRow>
                 <TableCell className="w-[100px] pl-2">
                   <DrawerTrigger asChild>
                     <Button variant="secondary">See</Button>

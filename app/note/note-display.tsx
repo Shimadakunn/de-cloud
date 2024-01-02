@@ -117,8 +117,8 @@ const PswDisplay = () => {
         </TableHeader>
         <TableBody>
           {notes!.map((note) => (
-            <Drawer>
-              <TableRow key={note.id}>
+            <Drawer key={note.id}>
+              <TableRow>
                 <TableCell className="w-[100px] pl-2">
                   <DrawerTrigger asChild>
                     <Button variant="secondary">See</Button>
