@@ -9,17 +9,17 @@ import { Web5 } from "@web5/api";
 const MyPage = () => {
   const router = useRouter();
 
-  // const [web5, setWeb5] = useState<Web5>();
-  // const [myDid, setMyDid] = useState<string>('');
+  const [web5, setWeb5] = useState<Web5>();
+  const [myDid, setMyDid] = useState<string>('');
 
-  // useEffect(() => {
-  //   const connectWeb5 = async () => {
-  //     const web5Result = await Web5.connect();
-  //     setWeb5(web5Result.web5);
-  //     setMyDid(web5Result.did);
-  //   }
-  //   connectWeb5();
-  // }, []);
+  useEffect(() => {
+    const connectWeb5 = async () => {
+      const web5Result = await Web5.connect();
+      setWeb5(web5Result.web5);
+      setMyDid(web5Result.did);
+    }
+    connectWeb5();
+  }, []);
   
   return (
     <main className="bg-[url('../public/background.png')] bg-cover flex items-center justify-center w-screen h-screen space-y-4">
@@ -39,7 +39,7 @@ const MyPage = () => {
       </Button>
       </div>
       <div className="w-full">
-      {/* {myDid} */}
+      {myDid}
       </div>
     </main>
   
