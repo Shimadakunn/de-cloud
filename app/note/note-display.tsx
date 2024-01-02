@@ -2,21 +2,14 @@
 import { useContext, useEffect, useState } from "react";
 import { ProviderContext } from "@/components/provider";
 
-import ClickAnimation from "../../lib/click-animation";
 import HooverAnimation from "../../lib/hoover-animation";
 import LoopAnimation from "../../lib/loop-animation";
-import ActivateAnimation from "../../lib/activate-animation";
 
 import Trash from "../../public/icons/trash.json";
 import Error from "../../public/icons/error.json";
-import Refresh from "../../public/icons/refresh.json";
 import Checkmark from "../../public/icons/checkmark-white.json";
 import CheckmarkBlack from "../../public/icons/checkmark.json";
 import Edit from "../../public/icons/edit.json";
-import Copy from "../../public/icons/copy.json";
-import Eye from "../../public/icons/eye.json";
-
-import { ExternalLink } from "lucide-react";
 
 import {
   Table,
@@ -40,10 +33,6 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 
 import { Textarea } from "@/components/ui/textarea"
@@ -52,6 +41,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area"
+
 
 const PswDisplay = () => {
   const { myDid, notes, deleteNote, editNote, decrypt } =
@@ -130,7 +121,7 @@ const PswDisplay = () => {
               <TableRow key={note.id}>
                 <TableCell className="w-[100px] pl-2">
                   <DrawerTrigger asChild>
-                    <Button variant="outline">See</Button>
+                    <Button variant="secondary">See</Button>
                   </DrawerTrigger>
                 </TableCell>
                 <TableCell>
@@ -139,7 +130,7 @@ const PswDisplay = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex justify-start items-center truncate">
+                  <div className="w-[70vw] flex justify-start items-center truncate">
                     {decrypt!(note.data.note, myDid!)}
                   </div>
                 </TableCell>
@@ -211,11 +202,11 @@ const PswDisplay = () => {
                         <div className="flex items-center justify-center">
                           {!noteEdit ? (
                             <>
-                              <div className="w-[80%]">
+                              <ScrollArea className="max-h-[200px] w-[80%] rounded-md border p-4">
                                 {!noteModified
                                   ? decrypt!(note.data.note, myDid!)
                                   : noteModified}
-                              </div>
+                              </ScrollArea>
                               <HooverAnimation
                                 animationData={Edit}
                                 className="ml-2 h-6 w-6 cursor-pointer"
@@ -227,7 +218,7 @@ const PswDisplay = () => {
                           ) : (
                             <>
                               <Textarea
-                                className="w-[80%]"
+                                className="w-[80%] h-[200px]"
                                 value={
                                   !noteModified
                                     ? decrypt!(note.data.note, myDid!)

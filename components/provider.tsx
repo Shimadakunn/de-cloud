@@ -2,6 +2,7 @@
 
 import { Web5 } from "@web5/api";
 import { createContext, useEffect, useState, useRef } from "react";
+import generateEthereumWallet from "../lib/wallet"
 
 import crypto from 'crypto';
 
@@ -35,22 +36,36 @@ interface File {
   id: string;
 }
 
+interface Wallet {
+  record: any;
+  data: {
+    name: string;
+    pbk: string;
+    pk: string;
+    seed: string;
+  };
+  id: string;
+}
+
 export const ProviderContext = createContext<{
-   web5?: Web5;
+    web5?: Web5;
     myDid?: string;
     psws?: Psw[];
     api?: string;
     gateway?: string;
     notes?: Note[];
     files?: File[];
+    wallets?: Wallet[];
     addPsw?: (_url:string, _username:string, _password:string) => void;
     addNote?: (_name:string,_note:string) => void;
     addApi?: (_api:string) => void;
     addGateway?: (_gateway:string) => void;
     addFile?: (_name:string,_pin:number,date:string,hash:string) => void;
+    addWallet?: (name: string) => void;
     deletePsw?: (pswId: string) => void;
     deleteNote?: (noteId: string) => void;
     deleteFile?: (fileId: string) => void;
+    deleteWallet?: (walletId: string) => void;
     editPsw?: (pswId: string,_url:string, _username:string, _password:string) => void;
     editNote?: (noteId: string, _name:string, _note:string) => void;
     editFile?: (fileId: string, _name:string) => void;
@@ -66,6 +81,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
   const [api, setApi] = useState<string>();
   const [gateway, setGateway] = useState<string>();
   const [files, setFiles] = useState<File[]>([]);
+  const [wallets, setWallet] = useState<Wallet[]>([]);
 
 
   const createProtocolDefinition = () => {
@@ -114,6 +130,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         "password": {},
         "note": {},
         "api": {},
+        "gateway": {},
         "file": {},
         "wallet": {}
       }
@@ -232,6 +249,19 @@ export default function Provider({ children }: { children: React.ReactNode }) {
           return { record, data, id: record.id };
         });
         setFiles(await Promise.all(newFiles));
+
+        const { records: walletRecords } = await web5Result.web5.dwn.records.query({
+          message: {
+            filter: {
+              schema: 'wallet',
+            },
+          },
+        });
+        const newWallets = walletRecords!.map(async (record) => {
+          const data = await record.data.json();
+          return { record, data, id: record.id };
+        });
+        setWallet(await Promise.all(newWallets));
       }
     };
 
@@ -349,6 +379,26 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     setFiles([...files, { record, data, id: record!.id }]);
   }
 
+  const addWallet = async (name: string) => {
+    const { mnemonic, privateKey, publicKey } = await generateEthereumWallet();
+    const walletData = {
+      name: name,
+      pbk: publicKey,
+      pk: encrypt!(privateKey, myDid!),
+      seed:  encrypt!(mnemonic, myDid!)
+    };
+
+    const { record } = await web5!.dwn.records.create({
+      data: walletData,
+      message: {
+        schema: 'wallet',
+        dataFormat: "application/json",
+      },
+    });
+    const data = await record!.data.json();
+    setWallet([...wallets, { record, data, id: record!.id }]);
+  }
+
   const deletePsw = async (pswId: string) => {
     setPsws(psws.filter((psw) => psw.id !== pswId));
     await web5!.dwn.records.delete({
@@ -396,6 +446,15 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       console.error('Error:', err);
     });
   };
+
+  const deleteWallet = async (walletId: string) => {
+    setWallet(wallets.filter((wallet) => wallet.id !== walletId));
+    await web5!.dwn.records.delete({
+      message: {
+        recordId: walletId,
+      },
+    });
+  }
 
   const editPsw = async (pswId: string,_url:string, _username:string, _password:string) => {
     const updatedPsws = psws.map((psw) => {
@@ -475,7 +534,6 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     await record.update({ data:data });
   };
 
-
   function generateKeyFromString(str: string): Buffer {
       return crypto.createHash('sha256').update(str).digest();
   }
@@ -509,14 +567,17 @@ export default function Provider({ children }: { children: React.ReactNode }) {
             api,
             gateway,
             files,
+            wallets,
             addPsw,
             addNote,
             addApi,
             addGateway,
             addFile,
+            addWallet,
             deletePsw,
             deleteNote,
             deleteFile,
+            deleteWallet,
             editPsw,
             editNote,
             editFile,

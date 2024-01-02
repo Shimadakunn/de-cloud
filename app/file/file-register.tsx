@@ -1,15 +1,12 @@
 "use client";
 import axios from "axios";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect} from "react";
 import HooverAnimation from "../../lib/hoover-animation";
 import LoopAnimation from "../../lib/loop-animation";
-import ClickAnimation from "../../lib/click-animation";
 
 import Edit from "../../public/icons/edit.json";
 import Checkmark from "../../public/icons/checkmark-white.json";
-import Refresh from "../../public/icons/refresh.json";
 import Error from "../../public/icons/error.json";
-import Copy from "../../public/icons/copy.json";
 
 import { Info } from "lucide-react";
 
@@ -21,7 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 import {
@@ -45,10 +42,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { PlusIcon, CheckIcon } from "@radix-ui/react-icons";
+import { PlusIcon} from "@radix-ui/react-icons";
 import { toast } from "@/components/ui/use-toast";
 
 import { ProviderContext } from "@/components/provider";
@@ -67,6 +62,14 @@ export function PswRegister() {
 
   const [gatewayEdit, setGatewayEdit] = useState(false);
   const [gatewayModified, setGatewayModified] = useState<string>();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(true);
+    }, 1000);
+  }, []);
+
 
   useEffect(() => {
     setApiEdit(api === undefined);
@@ -219,7 +222,7 @@ export function PswRegister() {
         </AlertDialogContent>
       </AlertDialog>
       <div className="flex items-center justify-center h-10">
-        {myDid &&
+        {myDid && loading &&
           (!gatewayEdit ? (
             <>
                 <TooltipProvider>
@@ -275,7 +278,7 @@ export function PswRegister() {
               />
             </>
           ))}
-        {myDid &&
+        {myDid && loading &&
           (!apiEdit ? (
             <>
                 <TooltipProvider>

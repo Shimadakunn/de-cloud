@@ -30,18 +30,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input";
-import { PlusIcon } from "@radix-ui/react-icons";
+import { PlusIcon} from "@radix-ui/react-icons";
 import { toast } from "@/components/ui/use-toast";
 
 import { ProviderContext } from "@/components/provider";
 
 const FormSchema = z.object({
   name: z.string().min(2, { message: "Name is required" }),
-  note: z
-    .string()
-    .min(2, { message: "You must enter a note" }),
 });
 
 export function PswRegister() {
@@ -49,12 +45,11 @@ export function PswRegister() {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
-      note: "",
     },
   });
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    addNote?.(data.name, data.note);
+    addWallet?.(data.name);
     toast({
       title: "You submitted the following values:",
       description: (
@@ -62,31 +57,27 @@ export function PswRegister() {
           <div>
             <span className="font-extrabold">Name:</span> {data.name}
           </div>
-          <div>
-            <span className="font-extrabold">Note:</span> {data.note}
-          </div>
         </pre>
       ),
     });
   }
-
-  const { addNote } = useContext(ProviderContext);
+  const { addWallet } = useContext(ProviderContext);
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button>
           <PlusIcon className="mr-2 h-4 w-4" />
-          Add Note
+          Add Wallet
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="sm:max-w-[425px]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <AlertDialogHeader>
-              <AlertDialogTitle>Enter your note</AlertDialogTitle>
+              <AlertDialogTitle>Enter your wallet</AlertDialogTitle>
               <AlertDialogDescription>
-                Input your infromations
+                Input your wallet infromations
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="grid space-y-4 mt-4 mb-6">
@@ -97,20 +88,7 @@ export function PswRegister() {
                   <FormItem>
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Add a name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="note"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Note</FormLabel>
-                    <FormControl>
-                    <Textarea placeholder="Type your message here." {...field} />
+                      <Input placeholder="Add name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

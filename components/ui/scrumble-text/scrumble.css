@@ -1,0 +1,10 @@
+.text-change{
+    font-family: 'SFPro', monospace;
+    font-weight: normal;
+    font-size: larger;
+    color: rgb(255, 255, 255);
+  }
+  .dud{
+    color: rgba(157, 157, 157, 0.8);
+    filter: drop-shadow(0 0 0.5em rgb(178, 178, 178));
+  }

@@ -16,8 +16,8 @@ const Header = () => {
     <>
       {pathname !== "/" && (
         <header
-          className={`bg-slate-800 h-screen flex flex-col space-y-20 justify-start items-left transition-all duration-300 ease-in-out py-6 ${
-            open ? "w-[20vw]" : "w-16"
+          className={`bg-[#212121] h-screen flex flex-col space-y-16 justify-start items-left transition-all duration-300 ease-in-out py-6 ${
+            open ? "w-52" : "w-16"
           }`}
         >
           <ActivateAnimation
@@ -29,14 +29,14 @@ const Header = () => {
             }}
           />
           <div
-            className="relative flex cursor-pointer"
+            className={`relative flex cursor-pointer hover:bg-[#93919270] py-4 ${pathname === "/password" && "bg-[#93919270]"}`}
             onClick={() => {
               router.push("/password");
             }}
           >
             <Lock className="ml-5 h-6 w-6" />
             <div
-              className={`absolute ml-24 transition-all duration-300 ease-in-out ${
+              className={`absolute ml-20 transition-all duration-300 ease-in-out ${
                 open ? "opacity-100" : "opacity-0"
               }`}
             >
@@ -44,14 +44,14 @@ const Header = () => {
             </div>
           </div>
           <div
-            className="relative flex cursor-pointer"
+            className={`relative flex cursor-pointer hover:bg-[#93919270] py-4 ${pathname === "/note" && "bg-[#93919270]"}`}
             onClick={() => {
               router.push("/note");
             }}
           >
             <StickyNote className="ml-5 h-6 w-6" />
             <div
-              className={`absolute ml-24 transition-all duration-300 ease-in-out ${
+              className={`absolute ml-20 transition-all duration-300 ease-in-out ${
                 open ? "opacity-100" : "opacity-0"
               }`}
             >
@@ -59,14 +59,14 @@ const Header = () => {
             </div>
           </div>
           <div
-            className="relative flex cursor-pointer"
+            className={`relative flex cursor-pointer hover:bg-[#93919270] py-4 ${pathname === "/file" && "bg-[#93919270]"}`}
             onClick={() => {
               router.push("/file");
             }}
           >
             <Paperclip className="ml-5 h-6 w-6" />
             <div
-              className={`absolute ml-24 transition-all duration-300 ease-in-out ${
+              className={`absolute ml-20 transition-all duration-300 ease-in-out ${
                 open ? "opacity-100" : "opacity-0"
               }`}
             >
@@ -74,14 +74,14 @@ const Header = () => {
             </div>
           </div>
           <div
-            className="relative flex cursor-pointer"
+            className={`relative flex cursor-pointer hover:bg-[#93919270] py-4 ${pathname === "/wallet" && "bg-[#93919270]"}`}
             onClick={() => {
               router.push("/wallet");
             }}
           >
             <Wallet className="ml-5 h-6 w-6" />
             <div
-              className={`absolute ml-24 transition-all duration-300 ease-in-out ${
+              className={`absolute ml-20 transition-all duration-300 ease-in-out ${
                 open ? "opacity-100" : "opacity-0"
               }`}
             >

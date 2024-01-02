@@ -40,10 +40,6 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 
 import { toast } from "@/components/ui/use-toast";
@@ -53,7 +49,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 const PswDisplay = () => {
-  const { myDid, psws, deletePsw, editPsw, decrypt } =
+  const { myDid, psws, deletePsw, editPsw , decrypt } =
     useContext(ProviderContext);
 
   const [number, setNumber] = useState(0);
@@ -128,7 +124,7 @@ const PswDisplay = () => {
       ? (username = psws!.find((psw) => psw.id === id)!.data.username)
       : (username = usernameModified);
     !passwordModified
-      ? (password = psws!.find((psw) => psw.id === id)!.data.password)
+      ? (password = decrypt!(psws!.find((psw) => psw.id === id)!.data.password,myDid!))
       : (password = passwordModified);
     editPsw!(id, url, username, password);
     toast({
@@ -171,7 +167,7 @@ const PswDisplay = () => {
               <TableRow key={psw.id}>
                 <TableCell className="w-[100px] pl-2">
                   <DrawerTrigger asChild>
-                    <Button variant="outline">See</Button>
+                    <Button variant="secondary">See</Button>
                   </DrawerTrigger>
                 </TableCell>
                 <TableCell className="w-[20vw]">
