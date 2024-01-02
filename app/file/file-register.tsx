@@ -48,12 +48,12 @@ import { toast } from "@/components/ui/use-toast";
 
 import { ProviderContext } from "@/components/provider";
 
-const FormSchema = z.object({
-  name: z.string().min(2, { message: "Name is required" }),
-  file: z.instanceof(File).optional(),
-});
-
 export function PswRegister() {
+  const FormSchema = z.object({
+    name: z.string().min(2, { message: "Name is required" }),
+    file: z.instanceof(File).optional(),
+  });
+
   const { myDid, api, gateway, addApi, addGateway, decrypt, addFile } =
     useContext(ProviderContext);
 
