@@ -218,7 +218,7 @@ const PswDisplay = () => {
                           ) : (
                             <>
                               <Textarea
-                                className="w-[80%] h-[200px]"
+                                className="w-[80%] max-h-[200px]"
                                 value={
                                   !noteModified
                                     ? decrypt!(note.data.note, myDid!)
