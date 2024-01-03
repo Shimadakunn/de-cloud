@@ -23,7 +23,7 @@ export default function RootLayout({
       <Provider>
         <div className='flex'>
           <SideBar />
-          {children}
+            {children}
         </div>
         <Toaster />
       </Provider>

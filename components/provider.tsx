@@ -1,10 +1,11 @@
 "use client";
 
 import { Web5 } from "@web5/api";
-import { createContext, useEffect, useState} from "react";
-import generateEthereumWallet from "../lib/wallet"
+import { createContext, useEffect, useState } from "react";
+import generateEthereumWallet from "../lib/wallet";
+import { toast } from "@/components/ui/use-toast";
 
-import crypto from 'crypto';
+import crypto from "crypto";
 
 interface Psw {
   record: any;
@@ -48,33 +49,40 @@ interface Wallet {
 }
 
 export const ProviderContext = createContext<{
-    web5?: Web5;
-    myDid?: string;
-    psws?: Psw[];
-    api?: string;
-    gateway?: string;
-    notes?: Note[];
-    files?: File[];
-    wallets?: Wallet[];
-    addPsw?: (_url:string, _username:string, _password:string) => void;
-    addNote?: (_name:string,_note:string) => void;
-    addApi?: (_api:string) => void;
-    addGateway?: (_gateway:string) => void;
-    addFile?: (_name:string,_pin:number,date:string,hash:string) => void;
-    addWallet?: (name: string) => void;
-    deletePsw?: (pswId: string) => void;
-    deleteNote?: (noteId: string) => void;
-    deleteFile?: (fileId: string) => void;
-    deleteWallet?: (walletId: string) => void;
-    editPsw?: (pswId: string,_url:string, _username:string, _password:string) => void;
-    editNote?: (noteId: string, _name:string, _note:string) => void;
-    encrypt?: (text: string, keyString: string) => string;
-    decrypt?: (encryptedText: string, keyString: string) => string;
-  }>({});
+  web5?: Web5;
+  myDid?: string;
+  psws?: Psw[];
+  api?: string;
+  gateway?: string;
+  notes?: Note[];
+  files?: File[];
+  wallets?: Wallet[];
+  setDwnLink?: (_dwn: string) => void;
+  addPsw?: (_url: string, _username: string, _password: string) => void;
+  addNote?: (_name: string, _note: string) => void;
+  addApi?: (_api: string) => void;
+  addGateway?: (_gateway: string) => void;
+  addFile?: (_name: string, _pin: number, date: string, hash: string) => void;
+  addWallet?: (name: string) => void;
+  deletePsw?: (pswId: string) => void;
+  deleteNote?: (noteId: string) => void;
+  deleteFile?: (fileId: string) => void;
+  deleteWallet?: (walletId: string) => void;
+  editPsw?: (
+    pswId: string,
+    _url: string,
+    _username: string,
+    _password: string
+  ) => void;
+  editNote?: (noteId: string, _name: string, _note: string) => void;
+  encrypt?: (text: string, keyString: string) => string;
+  decrypt?: (encryptedText: string, keyString: string) => string;
+}>({});
 
 export default function Provider({ children }: { children: React.ReactNode }) {
+  const [dwnLink, setDwnLink] = useState<string>();
   const [web5, setWeb5] = useState<Web5>();
-  const [myDid, setMyDid] = useState<string>('');
+  const [myDid, setMyDid] = useState<string>("");
   const [psws, setPsws] = useState<Psw[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [api, setApi] = useState<string>();
@@ -82,62 +90,53 @@ export default function Provider({ children }: { children: React.ReactNode }) {
   const [files, setFiles] = useState<File[]>([]);
   const [wallets, setWallet] = useState<Wallet[]>([]);
 
-
   const createProtocolDefinition = () => {
     const dingerProtocolDefinition = {
       protocol: "http://private-protocol.xyz",
       published: false,
       types: {
+        dwn: {
+          schema: "dwn",
+          dataFormats: ["text/plain"],
+        },
         password: {
           schema: "password",
-          dataFormats: [
-            "application/json"
-          ]
+          dataFormats: ["application/json"],
         },
         note: {
           schema: "note",
-          dataFormats: [
-            "application/json"
-          ]
+          dataFormats: ["application/json"],
         },
-        api:{
+        api: {
           schema: "api",
-          dataFormats: [
-            "text/plain"
-          ]
+          dataFormats: ["text/plain"],
         },
-        gateway:{
+        gateway: {
           schema: "gateway",
-          dataFormats: [
-            "text/plain"
-          ]
+          dataFormats: ["text/plain"],
         },
         file: {
           schema: "file",
-          dataFormats: [
-            "application/json"
-          ]
+          dataFormats: ["application/json"],
         },
         wallet: {
           schema: "wallet",
-          dataFormats: [
-            "application/json"
-          ]
-        }
+          dataFormats: ["application/json"],
+        },
       },
       structure: {
-        "password": {},
-        "note": {},
-        "api": {},
-        "gateway": {},
-        "file": {},
-        "wallet": {}
-      }
-    }
+        password: {},
+        note: {},
+        api: {},
+        gateway: {},
+        file: {},
+        wallet: {},
+      },
+    };
     return dingerProtocolDefinition;
   };
 
-  const queryForProtocol = async (web5:any) => {
+  const queryForProtocol = async (web5: any) => {
     return await web5.dwn.protocols.query({
       message: {
         filter: {
@@ -147,7 +146,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const installProtocolLocally = async (web5:any, protocolDefinition:any) => {
+  const installProtocolLocally = async (web5: any, protocolDefinition: any) => {
     return await web5.dwn.protocols.configure({
       message: {
         definition: protocolDefinition,
@@ -155,19 +154,24 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const configureProtocol = async (web5:any, did:any) => {
+  const configureProtocol = async (web5: any, did: any) => {
     const protocolDefinition = await createProtocolDefinition();
 
     const { protocols: localProtocol, status: localProtocolStatus } =
       await queryForProtocol(web5);
     console.log({ localProtocol, localProtocolStatus });
     if (localProtocolStatus.code !== 200 || localProtocol.length === 0) {
-
-      const { protocol, status } = await installProtocolLocally(web5, protocolDefinition);
+      const { protocol, status } = await installProtocolLocally(
+        web5,
+        protocolDefinition
+      );
       console.log("Protocol installed locally", protocol, status);
 
       const { status: configureRemoteStatus } = await protocol.send(did);
-      console.log("Did the protocol install on the remote DWN?", configureRemoteStatus);
+      console.log(
+        "Did the protocol install on the remote DWN?",
+        configureRemoteStatus
+      );
     } else {
       console.log("Protocol already installed");
     }
@@ -175,117 +179,116 @@ export default function Provider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const connectWeb5 = async () => {
-      const { Web5 } = await import('@web5/api');
-      
+      const { Web5 } = await import("@web5/api");
+
       try {
-        const { web5, did } = await Web5.connect({sync: '5s'});
+        const { web5, did } = await Web5.connect({ sync: "5s" });
         setWeb5(web5);
         setMyDid(did);
         console.log(web5);
         if (web5 && did) {
-          console.log('Web5 initialized');
+          console.log("Web5 initialized");
           await configureProtocol(web5, myDid);
-        
-        const { records } = await web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'password',
+
+          const { records } = await web5.dwn.records.query({
+            message: {
+              filter: {
+                schema: "password",
+              },
             },
-          },
-        });
-        const newPsws = records!.map(async (record) => {
-          const data = await record.data.json();
-          return { record, data, id: record.id };
-        });
-        setPsws(await Promise.all(newPsws));
+          });
+          const newPsws = records!.map(async (record) => {
+            const data = await record.data.json();
+            return { record, data, id: record.id };
+          });
+          setPsws(await Promise.all(newPsws));
 
-        const { records: apiRecords } = await web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'api',
+          const { records: apiRecords } = await web5.dwn.records.query({
+            message: {
+              filter: {
+                schema: "api",
+              },
             },
-          },
-        });
+          });
 
-        if (apiRecords && apiRecords.length > 0) {
-          const firstRecord = apiRecords[0];
-          console.log("api value: "+await firstRecord.data.text());
-          setApi( await firstRecord.data.text());
-        }
+          if (apiRecords && apiRecords.length > 0) {
+            const firstRecord = apiRecords[0];
+            console.log("api value: " + (await firstRecord.data.text()));
+            setApi(await firstRecord.data.text());
+          }
 
-        const { records: gatewayRecords } = await web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'gateway',
+          const { records: gatewayRecords } = await web5.dwn.records.query({
+            message: {
+              filter: {
+                schema: "gateway",
+              },
             },
-          },
-        });
+          });
 
-        if (gatewayRecords && gatewayRecords.length > 0) {
-          const firstGateway = gatewayRecords[0];
-          console.log("gateway value: "+await firstGateway.data.text());
-          setGateway( await firstGateway.data.text());
-        }
+          if (gatewayRecords && gatewayRecords.length > 0) {
+            const firstGateway = gatewayRecords[0];
+            console.log("gateway value: " + (await firstGateway.data.text()));
+            setGateway(await firstGateway.data.text());
+          }
 
-        const { records: noteRecords } = await web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'note',
+          const { records: noteRecords } = await web5.dwn.records.query({
+            message: {
+              filter: {
+                schema: "note",
+              },
             },
-          },
-        });
-        const newNotes = noteRecords!.map(async (record) => {
-          const data = await record.data.json();
-          return { record, data, id: record.id };
-        });
-        setNotes(await Promise.all(newNotes));
+          });
+          const newNotes = noteRecords!.map(async (record) => {
+            const data = await record.data.json();
+            return { record, data, id: record.id };
+          });
+          setNotes(await Promise.all(newNotes));
 
-        const { records: fileRecords } = await web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'file',
+          const { records: fileRecords } = await web5.dwn.records.query({
+            message: {
+              filter: {
+                schema: "file",
+              },
             },
-          },
-        });
-        const newFiles = fileRecords!.map(async (record) => {
-          const data = await record.data.json();
-          return { record, data, id: record.id };
-        });
-        setFiles(await Promise.all(newFiles));
+          });
+          const newFiles = fileRecords!.map(async (record) => {
+            const data = await record.data.json();
+            return { record, data, id: record.id };
+          });
+          setFiles(await Promise.all(newFiles));
 
-        const { records: walletRecords } = await web5.dwn.records.query({
-          message: {
-            filter: {
-              schema: 'wallet',
+          const { records: walletRecords } = await web5.dwn.records.query({
+            message: {
+              filter: {
+                schema: "wallet",
+              },
             },
-          },
-        });
-        const newWallets = walletRecords!.map(async (record) => {
-          const data = await record.data.json();
-          return { record, data, id: record.id };
-        });
-        setWallet(await Promise.all(newWallets));
+          });
+          const newWallets = walletRecords!.map(async (record) => {
+            const data = await record.data.json();
+            return { record, data, id: record.id };
+          });
+          setWallet(await Promise.all(newWallets));
         }
       } catch (error) {
-        console.error('Error initializing Web5:', error);
+        console.error("Error initializing Web5:", error);
       }
     };
-
     connectWeb5();
   }, []);
 
-  const addPsw = async (_url:string, _username:string, _password:string) => {
+  const addPsw = async (_url: string, _username: string, _password: string) => {
     const pswData = {
       url: _url,
       username: _username,
-      password: encrypt!(_password, myDid!)
+      password: encrypt!(_password, myDid!),
     };
 
     const { record } = await web5!.dwn.records.create({
       data: pswData,
       message: {
-        schema: 'password',
-        dataFormat: 'application/json',
+        schema: "password",
+        dataFormat: "application/json",
       },
     });
 
@@ -293,16 +296,16 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     setPsws([...psws, { record, data, id: record!.id }]);
   };
 
-  const addNote = async (_name:string,_note:string) => {
+  const addNote = async (_name: string, _note: string) => {
     const noteData = {
       name: _name,
-      note: encrypt!(_note, myDid!)
+      note: encrypt!(_note, myDid!),
     };
 
     const { record } = await web5!.dwn.records.create({
       data: noteData,
       message: {
-        schema: 'note',
+        schema: "note",
         dataFormat: "application/json",
       },
     });
@@ -311,25 +314,25 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     setNotes([...notes, { record, data, id: record!.id }]);
   };
 
-  const addApi = async (_api:string) => {
-    if(api === undefined){  
+  const addApi = async (_api: string) => {
+    if (api === undefined) {
       console.log("Api is undefined");
       const enc_api = encrypt!(_api, myDid!);
       const { record } = await web5!.dwn.records.create({
         data: enc_api,
         message: {
-          schema: 'api',
+          schema: "api",
           dataFormat: "text/plain",
         },
       });
       const data = await record!.data.text();
       setApi(data);
-    }else{
+    } else {
       console.log("Api is defined");
       const { record } = await web5!.dwn.records.read({
         message: {
           filter: {
-            schema: 'api',
+            schema: "api",
           },
         },
       });
@@ -338,52 +341,57 @@ export default function Provider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addGateway = async (_gateway:string) => {
-    if(gateway === undefined){  
+  const addGateway = async (_gateway: string) => {
+    if (gateway === undefined) {
       console.log("Gateway is undefined");
       const enc_gateway = encrypt!(_gateway, myDid!);
       const { record } = await web5!.dwn.records.create({
         data: enc_gateway,
         message: {
-          schema: 'gateway',
+          schema: "gateway",
           dataFormat: "text/plain",
         },
       });
       const data = await record!.data.text();
       setGateway(data);
-    }else{
+    } else {
       console.log("Provider is defined");
       const { record } = await web5!.dwn.records.read({
         message: {
           filter: {
-            schema: 'gateway',
+            schema: "gateway",
           },
         },
       });
       await record.update({ data: encrypt!(_gateway, myDid!) });
       setGateway(_gateway);
     }
-  }
+  };
 
-  const addFile = async (_name:string,_pin:number,date:string,hash:string) => {
+  const addFile = async (
+    _name: string,
+    _pin: number,
+    date: string,
+    hash: string
+  ) => {
     const fileData = {
       name: _name,
       pin: _pin,
       date: date,
-      hash: encrypt!(hash, myDid!)
+      hash: encrypt!(hash, myDid!),
     };
 
     const { record } = await web5!.dwn.records.create({
       data: fileData,
       message: {
-        schema: 'file',
+        schema: "file",
         dataFormat: "application/json",
       },
     });
 
     const data = await record!.data.json();
     setFiles([...files, { record, data, id: record!.id }]);
-  }
+  };
 
   const addWallet = async (name: string) => {
     const { mnemonic, privateKey, publicKey } = await generateEthereumWallet();
@@ -391,19 +399,19 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       name: name,
       pbk: publicKey,
       pk: encrypt!(privateKey, myDid!),
-      seed:  encrypt!(mnemonic, myDid!)
+      seed: encrypt!(mnemonic, myDid!),
     };
 
     const { record } = await web5!.dwn.records.create({
       data: walletData,
       message: {
-        schema: 'wallet',
+        schema: "wallet",
         dataFormat: "application/json",
       },
     });
     const data = await record!.data.json();
     setWallet([...wallets, { record, data, id: record!.id }]);
-  }
+  };
 
   const deletePsw = async (pswId: string) => {
     setPsws(psws.filter((psw) => psw.id !== pswId));
@@ -432,25 +440,25 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       },
     });
 
-    const url = 'https://api.pinata.cloud/pinning/unpin/';
+    const url = "https://api.pinata.cloud/pinning/unpin/";
     const options = {
-      method: 'DELETE',
-      headers: { 'accept': 'application/json' }
+      method: "DELETE",
+      headers: { accept: "application/json" },
     };
 
-    fetch(url+cid, options)
-    .then((res: Response)=> {
-      if (!res.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return res.json();
-    })
-    .then((data:any) => {
-      console.log(data);
-    })
-    .catch((err:Error) => {
-      console.error('Error:', err);
-    });
+    fetch(url + cid, options)
+      .then((res: Response) => {
+        if (!res.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return res.json();
+      })
+      .then((data: any) => {
+        console.log(data);
+      })
+      .catch((err: Error) => {
+        console.error("Error:", err);
+      });
   };
 
   const deleteWallet = async (walletId: string) => {
@@ -460,16 +468,23 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         recordId: walletId,
       },
     });
-  }
+  };
 
-  const editPsw = async (pswId: string,_url:string, _username:string, _password:string) => {
+  const editPsw = async (
+    pswId: string,
+    _url: string,
+    _username: string,
+    _password: string
+  ) => {
     const updatedPsws = psws.map((psw) => {
       if (psw.id === pswId) {
         return {
           ...psw,
-          data: {  url: _url,
+          data: {
+            url: _url,
             username: _username,
-            password: encrypt!(_password, myDid!) }
+            password: encrypt!(_password, myDid!),
+          },
         };
       }
       return psw;
@@ -485,17 +500,21 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       },
     });
 
-    await record.update({ data: {  url: _url,
-      username: _username,
-      password: encrypt!(_password, myDid!), } });
+    await record.update({
+      data: {
+        url: _url,
+        username: _username,
+        password: encrypt!(_password, myDid!),
+      },
+    });
   };
 
-  const editNote = async (noteId: string,_name:string, _note:string) => {
+  const editNote = async (noteId: string, _name: string, _note: string) => {
     const updatedNotes = notes.map((note) => {
       if (note.id === noteId) {
         return {
           ...note,
-          data: {  name:_name,note: encrypt!(_note, myDid!) }
+          data: { name: _name, note: encrypt!(_note, myDid!) },
         };
       }
       return note;
@@ -511,60 +530,69 @@ export default function Provider({ children }: { children: React.ReactNode }) {
       },
     });
 
-    await record.update({ data:{   name:_name,note: encrypt!(_note, myDid!) } });
+    await record.update({
+      data: { name: _name, note: encrypt!(_note, myDid!) },
+    });
   };
 
   function generateKeyFromString(str: string): Buffer {
-      return crypto.createHash('sha256').update(str).digest();
+    return crypto.createHash("sha256").update(str).digest();
   }
 
   function encrypt(text: string, keyString: string): string {
-      const key = generateKeyFromString(keyString);
-      const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-      const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
-      const encryptedWithIv = Buffer.concat([iv, encrypted]);
-      return encryptedWithIv.toString('base64');
+    const key = generateKeyFromString(keyString);
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+    const encrypted = Buffer.concat([
+      cipher.update(text, "utf8"),
+      cipher.final(),
+    ]);
+    const encryptedWithIv = Buffer.concat([iv, encrypted]);
+    return encryptedWithIv.toString("base64");
   }
 
   function decrypt(encryptedText: string, keyString: string): string {
-      const key = generateKeyFromString(keyString);
-      const encryptedWithIv = Buffer.from(encryptedText, 'base64');
-      const iv = encryptedWithIv.subarray(0, 16);
-      const encrypted = encryptedWithIv.subarray(16);
-      const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-      const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
-      return decrypted.toString('utf8');
+    const key = generateKeyFromString(keyString);
+    const encryptedWithIv = Buffer.from(encryptedText, "base64");
+    const iv = encryptedWithIv.subarray(0, 16);
+    const encrypted = encryptedWithIv.subarray(16);
+    const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
+    const decrypted = Buffer.concat([
+      decipher.update(encrypted),
+      decipher.final(),
+    ]);
+    return decrypted.toString("utf8");
   }
 
-    return (
-        <ProviderContext.Provider
-          value={{
-            web5,
-            myDid,
-            psws,
-            notes,
-            api,
-            gateway,
-            files,
-            wallets,
-            addPsw,
-            addNote,
-            addApi,
-            addGateway,
-            addFile,
-            addWallet,
-            deletePsw,
-            deleteNote,
-            deleteFile,
-            deleteWallet,
-            editPsw,
-            editNote,
-            encrypt,
-            decrypt
-          }}
-        >
-          {children}
-        </ProviderContext.Provider>
-      );
-    }
+  return (
+    <ProviderContext.Provider
+      value={{
+        web5,
+        myDid,
+        psws,
+        notes,
+        api,
+        gateway,
+        files,
+        wallets,
+        setDwnLink,
+        addPsw,
+        addNote,
+        addApi,
+        addGateway,
+        addFile,
+        addWallet,
+        deletePsw,
+        deleteNote,
+        deleteFile,
+        deleteWallet,
+        editPsw,
+        editNote,
+        encrypt,
+        decrypt,
+      }}
+    >
+      {children}
+    </ProviderContext.Provider>
+  );
+}

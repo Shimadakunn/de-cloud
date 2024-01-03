@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import { useState, useContext, useEffect} from "react";
+import { useState, useContext, useEffect } from "react";
 import HooverAnimation from "../../lib/hoover-animation";
 import LoopAnimation from "../../lib/loop-animation";
 
@@ -43,27 +43,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { PlusIcon} from "@radix-ui/react-icons";
+import { PlusIcon } from "@radix-ui/react-icons";
 import { toast } from "@/components/ui/use-toast";
 
 import { ProviderContext } from "@/components/provider";
 
 export function PswRegister() {
-  let FormSchema:any;
+  let FormSchema: any;
 
-if (typeof window !== 'undefined') {
-  // This code will only run in the browser (client-side)
-  FormSchema = z.object({
-    name: z.string().min(2, { message: "Name is required" }),
-    file: z.instanceof(File).optional(),
-  });
-} else {
-  // This code will run on the server (server-side)
-  FormSchema = z.object({
-    name: z.string().min(2, { message: "Name is required" }),
-    // You can exclude the 'file' field or handle it differently here
-  });
-}
+  if (typeof window !== "undefined") {
+    FormSchema = z.object({
+      name: z.string().min(2, { message: "Name is required" }),
+      file: z.instanceof(File).optional(),
+    });
+  } else {
+    FormSchema = z.object({
+      name: z.string().min(2, { message: "Name is required" }),
+    });
+  }
 
   const { myDid, api, gateway, addApi, addGateway, decrypt, addFile } =
     useContext(ProviderContext);
@@ -80,7 +77,6 @@ if (typeof window !== 'undefined') {
       setLoading(true);
     }, 1000);
   }, []);
-
 
   useEffect(() => {
     setApiEdit(api === undefined);
@@ -233,19 +229,20 @@ if (typeof window !== 'undefined') {
         </AlertDialogContent>
       </AlertDialog>
       <div className="flex items-center justify-center h-10">
-        {myDid && loading &&
+        {myDid &&
+          loading &&
           (!gatewayEdit ? (
             <>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="mr-2 h-4 w-4 cursor-pointer text-gray-300" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Gateway can be set up on your Pinata Cloud account</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="mr-2 h-4 w-4 cursor-pointer text-gray-300" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Gateway can be set up on your Pinata Cloud account</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <div className="w-[14rem] truncate">
                 <span className="text-gray-500 mr-1 truncate">Gateway: </span>
                 {gatewayModified ?? decrypt!(gateway!, myDid)}
@@ -289,26 +286,25 @@ if (typeof window !== 'undefined') {
               />
             </>
           ))}
-        {myDid && loading &&
+        {myDid &&
+          loading &&
           (!apiEdit ? (
             <>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="mr-2 h-4 w-4 cursor-pointer text-gray-300" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        JWT Key can be foudn when creating a new api key on
-                        Pinata CLoud
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="mr-2 h-4 w-4 cursor-pointer text-gray-300" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      JWT Key can be foudn when creating a new api key on Pinata
+                      CLoud
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <div className="w-[14rem] truncate">
-                <span className="text-gray-500 mr-1">
-                  Pinata JWT:{" "}
-                </span>
+                <span className="text-gray-500 mr-1">Pinata JWT: </span>
                 {apiModified ?? decrypt!(api!, myDid)}
               </div>
               <HooverAnimation

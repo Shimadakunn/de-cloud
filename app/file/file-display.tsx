@@ -48,19 +48,19 @@ const PswDisplay = () => {
     }
   }, [myDid]);
 
-  function formatDate(dateString:string) {
+  function formatDate(dateString: string) {
     const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
-  
+
     return `${day}/${month}/${year}`;
   }
 
   return (
     <div className="flex-grow">
       <Table>
-        {/* <TableCaption>
+        <TableCaption>
           {!myDid && (
             <div className="h-[60vh] flex items-center justify-center">
               <Progress value={number} className="w-[60%]" />
@@ -76,45 +76,51 @@ const PswDisplay = () => {
             <TableHead>Date</TableHead>
             <TableHead className="text-right">Delete</TableHead>
           </TableRow>
-        </TableHeader> */}
+        </TableHeader>
         <TableBody>
           {files!.map((file) => (
-              <TableRow key={file.id}>
-                <TableCell className="w-[100px] pl-2">
-                  <Button variant="secondary"
-                    onClick={() => {
-                      window.open("https://"+decrypt!(gateway!,myDid!)+"/ipfs/"+decrypt!(file.data.hash!,myDid!), "_blank");
-                      toast({
-                        title: "If there is a problem with the link, try to refresh the page or check the validity of your gateway and your JWT token.",
-                      });
-                    }}
-                  >See</Button>
-                </TableCell>
-                <TableCell className="">
-                  <div className="flex justify-start items-center">
-                    {file.data.name}
-                  </div>
-                </TableCell>
-                <TableCell className="">
-                    {file.data.pin}
-                </TableCell>
-                <TableCell className="">
-                  {formatDate(file.data.date)}
-                </TableCell>
-                <TableCell className=" flex items-center justify-end">
-                  <HooverAnimation
-                    animationData={Trash}
-                    className="h-6 w-6 cursor-pointer"
-                    onClick={() => {
-                      deleteFile!(file.id);
-                      toast({
-                        variant: "destructive",
-                        title: "File deleted",
-                      });
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
+            <TableRow key={file.id}>
+              <TableCell className="w-[100px] pl-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    window.open(
+                      "https://" +
+                        decrypt!(gateway!, myDid!) +
+                        "/ipfs/" +
+                        decrypt!(file.data.hash!, myDid!),
+                      "_blank"
+                    );
+                    toast({
+                      title:
+                        "If there is a problem with the link, try to refresh the page or check the validity of your gateway and your JWT token.",
+                    });
+                  }}
+                >
+                  See
+                </Button>
+              </TableCell>
+              <TableCell className="">
+                <div className="flex justify-start items-center">
+                  {file.data.name}
+                </div>
+              </TableCell>
+              <TableCell className="">{file.data.pin}</TableCell>
+              <TableCell className="">{formatDate(file.data.date)}</TableCell>
+              <TableCell className=" flex items-center justify-end">
+                <HooverAnimation
+                  animationData={Trash}
+                  className="h-6 w-6 cursor-pointer"
+                  onClick={() => {
+                    deleteFile!(file.id);
+                    toast({
+                      variant: "destructive",
+                      title: "File deleted",
+                    });
+                  }}
+                />
+              </TableCell>
+            </TableRow>
           ))}
         </TableBody>
       </Table>
